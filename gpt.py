@@ -1,5 +1,8 @@
 import os
 import logging
+import base64
+import requests
+from io import BytesIO
 from openai import OpenAI
 from datetime import datetime
 
@@ -28,7 +31,7 @@ def get_openai_client():
         
     return OpenAI(api_key=openai_api_key)
 
-def generate_podcast_introduction(podcast_title, style_guidance="", host_info="", custom_instructions=None):
+def generate_podcast_introduction(podcast_title, style_guidance="", host_info="", custom_instructions=None, model="gpt-3.5-turbo"):
     """
     Generate podcast introduction
     
@@ -37,6 +40,7 @@ def generate_podcast_introduction(podcast_title, style_guidance="", host_info=""
         style_guidance (str): Optional style guidance based on podcast description
         host_info (str): Optional host information
         custom_instructions (str): Optional custom AI instructions
+        model (str): OpenAI model to use
         
     Returns:
         str: Generated introduction
@@ -70,10 +74,12 @@ def generate_podcast_introduction(podcast_title, style_guidance="", host_info=""
         system_message = custom_instructions
     
     try:
-        # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-        # do not change this unless explicitly requested by the user
+        # Use the specified model or fall back to gpt-3.5-turbo if invalid
+        ai_model = model if model else "gpt-3.5-turbo"
+        logging.info(f"Using OpenAI model: {ai_model} for introduction generation")
+        
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model=ai_model,
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": prompt}
@@ -87,13 +93,14 @@ def generate_podcast_introduction(podcast_title, style_guidance="", host_info=""
         logging.error(f"Error generating podcast introduction: {str(e)}")
         return f"Welcome to {podcast_title} for {today}. Let's dive into the latest tech news."
 
-def summarize_article(article, podcast_duration=10):
+def summarize_article(article, podcast_duration=10, model="gpt-3.5-turbo"):
     """
     Summarize article using OpenAI
     
     Args:
         article (dict): Article dictionary
         podcast_duration (int): Target podcast duration in minutes
+        model (str): OpenAI model to use
         
     Returns:
         str: Summarized article
@@ -129,10 +136,12 @@ def summarize_article(article, podcast_duration=10):
     )
     
     try:
-        # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-        # do not change this unless explicitly requested by the user
+        # Use the specified model or fall back to gpt-3.5-turbo if invalid
+        ai_model = model if model else "gpt-3.5-turbo"
+        logging.info(f"Using OpenAI model: {ai_model} for article summarization")
+        
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model=ai_model,
             messages=[
                 {"role": "system", "content": "You are a technology podcast host summarizing news articles. Your audience values detailed analysis and comprehensive coverage."},
                 {"role": "user", "content": prompt}
@@ -169,10 +178,13 @@ def generate_transition():
     import random
     return random.choice(transitions)
 
-def generate_conclusion():
+def generate_conclusion(model="gpt-3.5-turbo"):
     """
     Generate podcast conclusion
     
+    Args:
+        model (str): OpenAI model to use
+        
     Returns:
         str: Generated conclusion
     """
@@ -187,10 +199,12 @@ def generate_conclusion():
     )
     
     try:
-        # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-        # do not change this unless explicitly requested by the user
+        # Use the specified model or fall back to gpt-3.5-turbo if invalid
+        ai_model = model if model else "gpt-3.5-turbo"
+        logging.info(f"Using OpenAI model: {ai_model} for conclusion generation")
+        
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model=ai_model,
             messages=[
                 {"role": "system", "content": "You are a professional podcast host concluding a technology news episode."},
                 {"role": "user", "content": prompt}
@@ -204,7 +218,126 @@ def generate_conclusion():
         logging.error(f"Error generating podcast conclusion: {str(e)}")
         return "That's all for today's episode. Thanks for listening, and we'll be back tomorrow with more tech news!"
 
-def generate_podcast_script(articles, podcast_title="Daily Tech Insights", podcast_description=None, podcast_author=None, ai_instructions=None, podcast_duration=10):
+def generate_podcast_artwork(podcast_title, podcast_description=None, podcast_category="Technology", size="1024x1024"):
+    """
+    Generate podcast cover art using DALL-E
+    
+    Args:
+        podcast_title (str): Podcast title
+        podcast_description (str): Podcast description for context
+        podcast_category (str): Category for styling the image
+        size (str): Size of the generated image (1024x1024, 1792x1024, or 1024x1792)
+        
+    Returns:
+        tuple: (success, filepath_or_error_message)
+    """
+    client = get_openai_client()
+    if not client:
+        return False, "OpenAI API key not configured"
+    
+    # Create prompt based on podcast information
+    base_prompt = f"Create a professional podcast cover art for '{podcast_title}'"
+    
+    # Add category context
+    category_context = {
+        "Technology": "with modern tech elements, circuit patterns, and a clean digital aesthetic",
+        "Business": "with professional business imagery, charts, or sleek office elements",
+        "News": "with journalism themes, newspaper elements, and information graphics",
+        "Science": "with scientific imagery, atoms, lab equipment, or space elements",
+        "Education": "with academic imagery, books, graduation caps, or learning elements",
+        "Arts": "with artistic elements, paint splashes, or creative visual metaphors",
+        "Comedy": "with fun, vibrant colors and playful visual elements",
+        "Health": "with wellness imagery, medical symbols, or healthy lifestyle elements",
+        "Entertainment": "with media elements, spotlights, or entertainment industry symbols"
+    }
+    
+    # Build the complete prompt
+    style_instructions = category_context.get(podcast_category, "with a professional, clean design")
+    prompt = f"{base_prompt} {style_instructions}. "
+    
+    # Add description context if available
+    if podcast_description and len(podcast_description) > 5:
+        # Extract key themes from description to inform the artwork
+        prompt += f"The podcast is about: {podcast_description[:100]}. "
+    
+    # Add design requirements
+    prompt += "Include the title prominently. Use a modern color palette. Make it visually appealing and professional. No text other than the title."
+    
+    try:
+        logging.info(f"Generating podcast artwork for '{podcast_title}'")
+        
+        # Generate image with DALL-E
+        # Handle size parameter to make it compatible with DALL-E requirements
+        valid_sizes = ["1024x1024", "1792x1024", "1024x1792"]
+        if size not in valid_sizes:
+            size = "1024x1024"  # Default to square format if invalid
+            
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size=size,
+            quality="standard",
+            n=1,
+        )
+        
+        # Get the image URL
+        if response and hasattr(response, 'data') and response.data and len(response.data) > 0:
+            image_url = response.data[0].url
+        else:
+            return False, "Failed to generate image: No image data in response"
+        
+        # Download the image
+        if not image_url:
+            return False, "No image URL was generated"
+            
+        try:
+            image_response = requests.get(image_url)
+            if image_response.status_code != 200:
+                return False, f"Failed to download generated image: HTTP {image_response.status_code}"
+        except Exception as e:
+            return False, f"Error downloading image: {str(e)}"
+        
+        # Create storage directory if it doesn't exist
+        os.makedirs('static/podcast_covers', exist_ok=True)
+        
+        # Save the image
+        # Create a filename based on the podcast title
+        filename = f"cover_{podcast_title.lower().replace(' ', '_')[:30]}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+        
+        # Create a consistent path format - just the relative path inside static
+        relative_path = os.path.join('podcast_covers', filename)
+        
+        # Full filepath for saving the file
+        filepath = os.path.join('static', relative_path)
+        
+        # Log what we're doing
+        logging.warning(f"COVER ART DEBUG - Saving podcast cover to: {filepath}")
+        
+        try:
+            with open(filepath, 'wb') as f:
+                f.write(image_response.content)
+                
+            # Verify the file was created
+            if os.path.exists(filepath):
+                file_size = os.path.getsize(filepath)
+                logging.warning(f"COVER ART DEBUG - Cover art file created successfully at: {filepath} (size: {file_size} bytes)")
+            else:
+                logging.warning(f"COVER ART DEBUG - ERROR: File not created at {filepath} despite no exceptions")
+                
+            # Return the path that should be saved in the database (relative to static/)
+            db_path = relative_path
+            logging.warning(f"COVER ART DEBUG - Path to save in DB: {db_path}")
+        except Exception as inner_e:
+            logging.error(f"COVER ART DEBUG - ERROR writing cover art file: {str(inner_e)}")
+            raise inner_e  # Re-raise to be caught by outer exception handler
+        
+        return True, db_path
+        
+    except Exception as e:
+        logging.error(f"Error generating podcast artwork: {str(e)}")
+        return False, f"Error generating podcast artwork: {str(e)}"
+
+def generate_podcast_script(articles, podcast_title="Daily Tech Insights", podcast_description=None, podcast_author=None, host_name=None, ai_instructions=None, podcast_duration=10, openai_model="gpt-3.5-turbo"):
     """
     Generate full podcast script
     
@@ -212,14 +345,16 @@ def generate_podcast_script(articles, podcast_title="Daily Tech Insights", podca
         articles (list): List of article dictionaries
         podcast_title (str): Podcast title
         podcast_description (str): Podcast description to use as style guidance
-        podcast_author (str): Podcast author/host name
+        podcast_author (str): Podcast author for metadata
+        host_name (str): Name of the podcast host to mention in the script
         ai_instructions (str): Custom AI instructions
         podcast_duration (int): Target podcast duration in minutes
+        openai_model (str): OpenAI model to use for generation
         
     Returns:
         str: Generated podcast script
     """
-    logging.info(f"Generating podcast script for {podcast_title} with {len(articles)} articles")
+    logging.info(f"Generating podcast script for {podcast_title} with {len(articles)} articles using model {openai_model}")
     
     script_parts = []
     
@@ -229,10 +364,12 @@ def generate_podcast_script(articles, podcast_title="Daily Tech Insights", podca
         style_guidance = f"\nPodcast description: {podcast_description}"
     
     host_info = ""
-    if podcast_author:
+    if host_name:
+        host_info = f"\nHost: {host_name}"
+    elif podcast_author:
         host_info = f"\nHost: {podcast_author}"
         
-    intro = generate_podcast_introduction(podcast_title, style_guidance, host_info, ai_instructions)
+    intro = generate_podcast_introduction(podcast_title, style_guidance, host_info, ai_instructions, openai_model)
     script_parts.append(intro)
     script_parts.append("\n\n")
     
@@ -252,7 +389,7 @@ def generate_podcast_script(articles, podcast_title="Daily Tech Insights", podca
     
     # Process all available articles up to max_articles
     for i, article in enumerate(articles[:max_articles]):
-        article_summary = summarize_article(article, podcast_duration)
+        article_summary = summarize_article(article, podcast_duration, openai_model)
         script_parts.append(article_summary)
         script_parts.append("\n\n")
         
@@ -262,7 +399,7 @@ def generate_podcast_script(articles, podcast_title="Daily Tech Insights", podca
             script_parts.append("\n\n")
     
     # Conclusion
-    conclusion = generate_conclusion()
+    conclusion = generate_conclusion(openai_model)
     script_parts.append(conclusion)
     
     return "".join(script_parts)
