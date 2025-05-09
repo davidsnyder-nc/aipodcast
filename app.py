@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
@@ -297,6 +298,12 @@ def update_profile():
     return redirect(url_for('profile'))
 
 # Routes
+@app.route('/help')
+@login_required
+def help():
+    """Help and documentation page"""
+    return render_template('help.html')
+
 @app.route('/')
 def index():
     # Redirect to login if not authenticated
@@ -473,11 +480,14 @@ def new_podcast():
         podcast.podcast_title = request.form.get('podcast_title', f"{current_user.username}'s Podcast")
         podcast.podcast_description = request.form.get('podcast_description', "An AI-generated daily tech news podcast.")
         podcast.podcast_author = request.form.get('podcast_author', current_user.username)
+        podcast.host_name = request.form.get('host_name')
         podcast.podcast_language = request.form.get('podcast_language', 'en-us')
         podcast.podcast_category = request.form.get('podcast_category', 'Technology')
         podcast.podcast_explicit = True  # All podcasts are marked as explicit
         podcast.time_frame = request.form.get('time_frame', 'today')
         podcast.ai_instructions = request.form.get('ai_instructions')
+        podcast.blocked_terms = request.form.get('blocked_terms')
+        podcast.openai_model = request.form.get('openai_model', 'gpt-3.5-turbo')
         
         # Initialize RSS slug based on podcast title
         podcast_title = request.form.get('podcast_title', f"{current_user.username}'s Podcast")
@@ -515,7 +525,7 @@ def new_podcast():
         podcast.voice_stability = voice_stability
         podcast.voice_similarity_boost = voice_similarity_boost
         
-        # Handle cover art upload
+        # Handle cover art upload or use AI-generated cover
         if 'cover_art' in request.files:
             file = request.files['cover_art']
             if file and file.filename and file.filename != '' and allowed_file(file.filename):
@@ -525,9 +535,69 @@ def new_podcast():
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(filepath)
                 podcast.cover_art_path = f"uploads/{filename}"
+        elif request.form.get('generated_cover_path'):
+            # Use the AI-generated cover art
+            generated_path = request.form.get('generated_cover_path', '')
+            import logging
+            logging.warning(f"COVER ART DEBUG - New podcast - Generated cover path from form: {generated_path}")
+            
+            if generated_path:
+                # The path should already be correct (relative to static)
+                # But let's ensure it doesn't have any 'static/' prefix 
+                db_path = generated_path
+                if db_path.startswith('static/'):
+                    db_path = db_path.replace('static/', '')
+                
+                logging.warning(f"COVER ART DEBUG - New podcast - Path for DB storage: {db_path}")
+                
+                # Set the new cover art path
+                podcast.cover_art_path = db_path
+                logging.warning(f"COVER ART DEBUG - New podcast - Updated podcast cover art path to: {db_path}")
+                
+                # Verify the file exists
+                full_path = os.path.join('static', db_path)
+                if os.path.exists(full_path):
+                    logging.warning(f"COVER ART DEBUG - New podcast - Cover art file exists at: {full_path}")
+                else:
+                    logging.warning(f"COVER ART DEBUG - New podcast - WARNING: Cover art file does not exist at: {full_path}")
+        
+        # Handle RSS feed sources
+        feed_sources = request.form.getlist('feed_sources[]')
         
         db.session.add(podcast)
         db.session.commit()
+        
+        # Create RSS feed associations for the selected sources
+        if feed_sources:
+            rss_feed_mapping = {
+                'hacker_news': 'https://news.ycombinator.com/rss',
+                'tech_crunch': 'https://techcrunch.com/feed/',
+                'the_verge': 'https://www.theverge.com/rss/index.xml',
+                'wired': 'https://www.wired.com/feed/rss',
+                'openai_blog': 'https://openai.com/blog/rss/',
+                'dev_to': 'https://dev.to/feed',
+                'github_blog': 'https://github.blog/feed/',
+                'huggingface_blog': 'https://huggingface.co/blog/feed.xml',
+                'forbes': 'https://www.forbes.com/business/feed/',
+                'bloomberg': 'https://www.bloomberg.com/feed/technology/feed.xml',
+                'wsj': 'https://feeds.a.dj.com/rss/RSSWSJD.xml',
+                'vc': 'https://news.crunchbase.com/feed/',
+                'saastr': 'https://www.saastr.com/feed/',
+                'product_hunt': 'https://www.producthunt.com/feed'
+            }
+            
+            for source_id in feed_sources:
+                if source_id in rss_feed_mapping:
+                    feed = models.RssFeed()
+                    feed.name = source_id.replace('_', ' ').title()  # Transform id to readable name
+                    feed.url = rss_feed_mapping[source_id]
+                    feed.active = True
+                    feed.podcast_id = podcast.id  # Associate with the newly created podcast
+                    feed.user_id = current_user.id
+                    db.session.add(feed)
+            
+            db.session.commit()
+            flash(f'Added {len(feed_sources)} RSS feeds to your podcast.', 'success')
         
         flash('New podcast created successfully!', 'success')
         return redirect(url_for('settings'))
@@ -548,11 +618,14 @@ def update_settings(id):
     podcast.podcast_title = request.form.get('podcast_title')
     podcast.podcast_description = request.form.get('podcast_description')
     podcast.podcast_author = request.form.get('podcast_author')
+    podcast.host_name = request.form.get('host_name')
     podcast.podcast_language = request.form.get('podcast_language')
     podcast.podcast_category = request.form.get('podcast_category')
     podcast.podcast_explicit = True  # All podcasts are marked as explicit
     podcast.time_frame = request.form.get('time_frame', 'today')
     podcast.ai_instructions = request.form.get('ai_instructions')
+    podcast.blocked_terms = request.form.get('blocked_terms')
+    podcast.openai_model = request.form.get('openai_model', 'gpt-3.5-turbo')
     
     # Update RSS feed settings
     podcast.rss_slug = request.form.get('rss_slug')
@@ -573,7 +646,7 @@ def update_settings(id):
         
     podcast.podcast_duration = podcast_duration
     
-    # Handle cover art upload
+    # Handle cover art upload or use AI-generated cover
     if 'cover_art' in request.files:
         file = request.files['cover_art']
         if file and file.filename and file.filename != '' and allowed_file(file.filename):
@@ -588,6 +661,43 @@ def update_settings(id):
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             podcast.cover_art_path = f"uploads/{filename}"
+    elif request.form.get('generated_cover_path'):
+        # Use the AI-generated cover art
+        generated_path = request.form.get('generated_cover_path', '')
+        import logging
+        logging.info(f"Edit podcast - Generated cover path from form: {generated_path}")
+            
+        if generated_path:
+            # The path should already be correct (relative to static)
+            # But let's ensure it doesn't have any 'static/' prefix 
+            db_path = generated_path
+            if db_path.startswith('static/'):
+                db_path = db_path.replace('static/', '')
+                
+            logging.info(f"Edit podcast - Path for DB storage: {db_path}")
+            
+            # Check if the file exists
+            full_path = os.path.join('static', db_path)
+            logging.info(f"Edit podcast - Full file path to check: {full_path}")
+            
+            # SIMPLIFIED APPROACH: Trust the path we received and assign it directly
+            # Delete old cover art if it exists and it's different from what we're saving
+            if podcast.cover_art_path and podcast.cover_art_path != db_path and os.path.exists(os.path.join('static', podcast.cover_art_path)):
+                try:
+                    logging.warning(f"COVER ART DEBUG - Deleting old cover art: {podcast.cover_art_path}")
+                    os.remove(os.path.join('static', podcast.cover_art_path))
+                except Exception as e:
+                    logging.warning(f"COVER ART DEBUG - Failed to delete old cover art: {str(e)}")
+            
+            # Set the new cover art path
+            podcast.cover_art_path = db_path
+            logging.warning(f"COVER ART DEBUG - Updated podcast cover art path to: {db_path}")
+            
+            # Verify the file exists
+            if os.path.exists(full_path):
+                logging.warning(f"COVER ART DEBUG - Cover art file exists at: {full_path}")
+            else:
+                logging.warning(f"COVER ART DEBUG - WARNING: Cover art file does not exist at: {full_path}")
     
     # Update voice settings
     podcast.voice_id = request.form.get('voice_id', '')
@@ -800,6 +910,55 @@ def update_voice():
     flash('Voice settings updated successfully!', 'success')
     return redirect(url_for('settings', _anchor='nav-voices'))
 
+@app.route('/generate_cover_art', methods=['POST'])
+@login_required
+def generate_cover_art():
+    """
+    Generate podcast cover art using DALL-E
+    """
+    import logging
+    from gpt import generate_podcast_artwork
+    
+    try:
+        data = request.json
+        podcast_title = data.get('podcast_title', 'My Podcast')
+        podcast_description = data.get('podcast_description', '')
+        podcast_category = data.get('category', 'Technology')
+        
+        # Call the function to generate artwork
+        success, result = generate_podcast_artwork(
+            podcast_title=podcast_title,
+            podcast_description=podcast_description,
+            podcast_category=podcast_category
+        )
+        
+        if success:
+            # The result from generate_podcast_artwork is now standardized
+            # It returns just the relative path within static/ folder
+            relative_path = result.replace('\\', '/')
+            logging.warning(f"COVER ART DEBUG - Generated art path from DALL-E (relative to static/): {relative_path}")
+            
+            # Verify the file exists
+            full_path = os.path.join('static', relative_path)
+            if os.path.exists(full_path):
+                logging.warning(f"COVER ART DEBUG - Generated cover art file exists at: {full_path}")
+            else:
+                logging.warning(f"COVER ART DEBUG - WARNING: Generated cover art file does not exist at: {full_path}")
+            
+            # Return both the file path and URL for the image
+            return jsonify({
+                "success": True, 
+                "file_path": relative_path,
+                "image_url": url_for('static', filename=relative_path),
+                "message": "Cover art generated successfully!"
+            })
+        else:
+            return jsonify({"success": False, "error": result}), 500
+            
+    except Exception as e:
+        logging.error(f"Error generating cover art: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/generate_podcast', methods=['GET', 'POST'])
 @login_required
 def generate_podcast():
@@ -807,146 +966,350 @@ def generate_podcast():
     user_podcasts = models.Settings.query.filter_by(user_id=current_user.id).all()
     
     if request.method == 'POST':
-        podcast_id = request.form.get('podcast_id')
-        if not podcast_id:
-            flash('Please select a podcast to generate content for.', 'warning')
+        podcast_ids = request.form.getlist('podcast_ids[]')
+        if not podcast_ids:
+            flash('Please select at least one podcast to generate content for.', 'warning')
             return redirect(url_for('generate_podcast'))
         
-        try:
-            # Get the selected podcast settings
-            podcast = models.Settings.query.get_or_404(podcast_id)
-            
-            # Check if the podcast belongs to the current user
-            if podcast.user_id != current_user.id and not current_user.is_admin:
-                flash('You do not have permission to generate content for this podcast.', 'danger')
-                return redirect(url_for('index'))
-            
-            # Create directory for today's date
-            today = datetime.now().strftime('%Y%m%d')
-            storage_dir = f'storage/{today}'
-            os.makedirs(storage_dir, exist_ok=True)
-            
-            # Step 1: Fetch RSS feeds - only for this podcast
-            active_feeds = models.RssFeed.query.filter_by(
-                active=True, 
-                podcast_id=podcast.id
-            ).all()
-            
-            if not active_feeds:
-                flash('No active RSS feeds found for this podcast! Please add feeds to this podcast.', 'danger')
-                return redirect(url_for('feeds'))
-                
-            feed_urls = [feed.url for feed in active_feeds]
-            # Use the podcast's time_frame setting when fetching articles
-            # Increase max_articles_per_feed to 15 to get more content
-            articles = fetch_rss_feeds(feed_urls, max_articles_per_feed=15, time_frame=podcast.time_frame)
-            
-            # Save fetched data to JSON
-            with open(f'{storage_dir}/data.json', 'w') as f:
-                json.dump(articles, f)
-                
-            # Step 2: Generate podcast script
-            podcast_title = podcast.podcast_title
-            podcast_description = podcast.podcast_description
-            podcast_author = podcast.podcast_author
-            ai_instructions = podcast.ai_instructions
-            podcast_duration = podcast.podcast_duration
-            
-            # Pass all relevant podcast settings to the script generator
-            script = generate_podcast_script(
-                articles, 
-                podcast_title=podcast_title,
-                podcast_description=podcast_description,
-                podcast_author=podcast_author,
-                ai_instructions=ai_instructions,
-                podcast_duration=podcast_duration
-            )
-            
-            # Save script to file
-            script_path = f'{storage_dir}/script.txt'
-            with open(script_path, 'w') as f:
-                f.write(script)
-            
-            # Create episode record
-            episode = models.Episode()
-            episode.title = f"{podcast_title} - {datetime.now().strftime('%Y-%m-%d')}"
-            episode.date = datetime.now()
-            episode.script = script
-            episode.script_path = script_path
-            episode.status = "script_generated"
-            episode.podcast_id = podcast.id  # Associate the episode with the podcast
-            db.session.add(episode)
-            db.session.commit()
-            
-            flash('Podcast script generated successfully!', 'success')
-            return redirect(url_for('episode', id=episode.id))
+        # We'll track which podcasts were processed successfully
+        successful_podcasts = []
+        failed_podcasts = []
         
-        except Exception as e:
-            logging.error(f"Error generating podcast: {str(e)}")
-            flash(f'Error generating podcast: {str(e)}', 'danger')
-            return redirect(url_for('index'))
+        for podcast_id in podcast_ids:
+            try:
+                # Get the selected podcast settings
+                podcast = models.Settings.query.get(podcast_id)
+                if not podcast:
+                    failed_podcasts.append(f"Podcast ID {podcast_id} not found")
+                    continue
+                
+                # Check if the podcast belongs to the current user
+                if podcast.user_id != current_user.id and not current_user.is_admin:
+                    failed_podcasts.append(f"No permission for podcast: {podcast.podcast_title}")
+                    continue
+                
+                # Create directory for today's date
+                today = datetime.now().strftime('%Y%m%d')
+                storage_dir = f'storage/{today}/{podcast.id}'  # Add podcast ID to path to avoid conflicts
+                os.makedirs(storage_dir, exist_ok=True)
+                
+                # Step 1: Fetch RSS feeds - only for this podcast
+                active_feeds = models.RssFeed.query.filter_by(
+                    active=True, 
+                    podcast_id=podcast.id
+                ).all()
+                
+                if not active_feeds:
+                    failed_podcasts.append(f"No active RSS feeds for: {podcast.podcast_title}")
+                    continue
+                    
+                feed_urls = [feed.url for feed in active_feeds]
+                logging.info(f"Fetching articles from {len(feed_urls)} RSS feeds for podcast '{podcast.podcast_title}'")
+                
+                try:
+                    # Use the podcast's time_frame setting and blocked_terms when fetching articles
+                    # Increase max_articles_per_feed to 15 to get more content
+                    articles = fetch_rss_feeds(
+                        feed_urls,
+                        max_articles_per_feed=15, 
+                        time_frame=podcast.time_frame,
+                        blocked_terms=podcast.blocked_terms
+                    )
+                    
+                    if not articles:
+                        failed_podcasts.append(f"No articles found for: {podcast.podcast_title}")
+                        continue
+                        
+                    logging.info(f"Found {len(articles)} articles from RSS feeds for '{podcast.podcast_title}'")
+                    
+                    # Save fetched data to JSON
+                    with open(f'{storage_dir}/data.json', 'w') as f:
+                        json.dump(articles, f)
+                    
+                    # Step 2: Generate podcast script
+                    podcast_title = podcast.podcast_title
+                    podcast_description = podcast.podcast_description
+                    podcast_author = podcast.podcast_author
+                    host_name = podcast.host_name
+                    ai_instructions = podcast.ai_instructions
+                    podcast_duration = podcast.podcast_duration
+                    openai_model = podcast.openai_model
+                    
+                    logging.info(f"Generating podcast script for '{podcast_title}' using model {openai_model}")
+                    
+                    # Pass all relevant podcast settings to the script generator including the AI model
+                    script = generate_podcast_script(
+                        articles, 
+                        podcast_title=podcast_title,
+                        podcast_description=podcast_description,
+                        podcast_author=podcast_author,
+                        host_name=host_name,
+                        ai_instructions=ai_instructions,
+                        podcast_duration=podcast_duration,
+                        openai_model=openai_model
+                    )
+                    
+                    if not script or len(script.strip()) < 100:  # Basic validation
+                        failed_podcasts.append(f"Generated script too short for: {podcast.podcast_title}")
+                        continue
+                    
+                    # Save script to file
+                    script_path = f'{storage_dir}/script.txt'
+                    with open(script_path, 'w') as f:
+                        f.write(script)
+                    
+                    logging.info(f"Script generated successfully for '{podcast.podcast_title}', length: {len(script)} characters")
+                    
+                    # Create episode record
+                    episode = models.Episode()
+                    episode.title = f"{podcast_title} - {datetime.now().strftime('%Y-%m-%d')}"
+                    episode.date = datetime.now()
+                    episode.script = script
+                    episode.script_path = script_path
+                    episode.status = "script_generated"
+                    episode.podcast_id = podcast.id  # Associate the episode with the podcast
+                    db.session.add(episode)
+                    db.session.commit()
+                    
+                    # Add to successful podcasts list
+                    successful_podcasts.append({"title": podcast.podcast_title, "episode_id": episode.id})
+                    
+                except Exception as e:
+                    error_msg = str(e)
+                    logging.error(f"Error generating podcast '{podcast.podcast_title}': {error_msg}")
+                    failed_podcasts.append(f"Error for {podcast.podcast_title}: {error_msg[:100]}...")
             
+            except Exception as e:
+                error_msg = str(e)
+                logging.error(f"Error processing podcast ID {podcast_id}: {error_msg}")
+                failed_podcasts.append(f"Error processing podcast ID {podcast_id}: {error_msg[:100]}...")
+        
+        # After processing all podcasts, show summary
+        if successful_podcasts:
+            if len(successful_podcasts) == 1:
+                # If only one podcast was processed successfully, redirect to its episode page
+                flash(f"Successfully generated podcast: {successful_podcasts[0]['title']}", 'success')
+                return redirect(url_for('episode', id=successful_podcasts[0]['episode_id']))
+            else:
+                # If multiple podcasts were processed, redirect to the episodes list with a summary
+                flash(f"Successfully generated {len(successful_podcasts)} podcasts: " + 
+                      ", ".join(p['title'] for p in successful_podcasts), 'success')
+                return redirect(url_for('index'))
+        
+        # If no podcasts were processed successfully, show errors
+        if failed_podcasts:
+            for error in failed_podcasts:
+                flash(error, 'danger')
+        
+        return redirect(url_for('generate_podcast'))
+    
     # GET request - show podcast selection form
     return render_template('generate_podcast.html', podcasts=user_podcasts)
 
 @app.route('/generate_audio/<int:id>')
 @login_required
 def generate_audio(id):
+    """
+    Generate audio for an episode - SIMPLE DIRECT VERSION
+    No background tasks or progress tracking, just a direct call to generate audio
+    """
     try:
+        # Get the episode
+        logging.info(f"Starting direct audio generation for episode ID {id}")
         episode = models.Episode.query.get_or_404(id)
+        
         if not episode.script:
+            logging.error(f"No script found for episode ID {id}")
             flash('No script found for this episode!', 'danger')
             return redirect(url_for('episode', id=id))
         
-        # Get the podcast associated with this episode
+        # Get the podcast
         podcast = None
         if episode.podcast_id:
             podcast = models.Settings.query.get(episode.podcast_id)
         
-        # Check if the podcast has specific voice settings
-        use_podcast_voice = False
-        if podcast and podcast.voice_id and podcast.voice_id.strip() != '':
-            use_podcast_voice = True
-            
-            # Create a voice settings object using podcast settings
-            class PodcastVoiceSettings:
+        # Get voice settings - either from podcast or fallback to global
+        if podcast and podcast.voice_id and podcast.voice_id.strip():
+            # Create voice settings from podcast
+            class VoiceSettings:
                 def __init__(self, voice_id, stability, similarity_boost):
                     self.voice_id = voice_id
                     self.stability = stability
                     self.similarity_boost = similarity_boost
             
-            voice = PodcastVoiceSettings(
+            voice = VoiceSettings(
                 podcast.voice_id,
                 podcast.voice_stability or 0.5,
                 podcast.voice_similarity_boost or 0.5
             )
+            logging.info(f"Using podcast voice ID: {voice.voice_id}")
         else:
-            # Fall back to global voice settings
+            # Use global voice settings
             voice = models.ElevenLabsVoice.query.first()
             if not voice:
-                flash('No voice settings found! Please set up ElevenLabs voice first.', 'danger')
-                return redirect(url_for('settings', _anchor='nav-voices'))
+                flash('No voice settings found! Please configure voice settings first.', 'danger')
+                return redirect(url_for('voices'))
+            logging.info(f"Using global voice ID: {voice.voice_id}")
         
-        # Generate audio
+        # Set up audio storage path
         today = episode.date.strftime('%Y%m%d')
         storage_dir = f'storage/{today}'
         os.makedirs(storage_dir, exist_ok=True)
-        
         audio_path = f'{storage_dir}/podcast.mp3'
-        audio_url = convert_to_speech(episode.script, voice, audio_path)
         
-        # Update episode record
-        episode.audio_path = audio_path
-        episode.status = "audio_generated"
+        # Import the TTS module
+        from tts import convert_to_speech
+        
+        # Update episode status
+        episode.status = "generating_audio"
         db.session.commit()
         
-        flash('Podcast audio generated successfully!', 'success')
+        # Start a separate thread to generate audio
+        def generate_audio_thread():
+            try:
+                # Import needed modules in thread
+                import logging
+                import os
+                from app import db
+                import models
+                from tts import convert_to_speech
+                
+                logging.info(f"Thread started for audio generation of episode {id}")
+                
+                # Generate the audio file
+                audio_result = convert_to_speech(episode.script, voice, audio_path)
+                
+                # Check if generation was successful
+                if audio_result and os.path.exists(audio_result):
+                    # Update episode status to success
+                    with db.session.begin():
+                        episode = models.Episode.query.get(id)
+                        if episode:
+                            episode.audio_path = audio_path
+                            episode.status = "audio_generated"
+                            logging.info(f"Audio generation successful for episode {id}")
+                        else:
+                            logging.error(f"Episode {id} not found after audio generation")
+                else:
+                    # Update episode status to failure
+                    with db.session.begin():
+                        episode = models.Episode.query.get(id)
+                        if episode:
+                            episode.status = "script_generated"  # Revert to previous state
+                            logging.error(f"Audio generation failed for episode {id}")
+                        else:
+                            logging.error(f"Episode {id} not found after audio generation")
+            
+            except Exception as e:
+                # Log the error and update episode status
+                error_msg = f"Error generating audio: {str(e)}"
+                logging.error(error_msg)
+                
+                try:
+                    with db.session.begin():
+                        episode = models.Episode.query.get(id)
+                        if episode:
+                            episode.status = "script_generated"  # Revert to previous state
+                            logging.info(f"Reverted episode {id} status due to error")
+                except Exception as db_error:
+                    logging.error(f"Database error updating episode status: {str(db_error)}")
+        
+        # Start generation in a separate thread
+        import threading
+        thread = threading.Thread(target=generate_audio_thread)
+        thread.daemon = True
+        thread.start()
+        
+        # Return to episode page with message
+        flash('Audio generation started. This may take a few minutes. Check back soon to see if audio is ready.', 'info')
         return redirect(url_for('episode', id=id))
     
     except Exception as e:
-        logging.error(f"Error generating audio: {str(e)}")
-        flash(f'Error generating audio: {str(e)}', 'danger')
+        logging.error(f"Error initiating audio generation: {str(e)}")
+        flash(f'Error initiating audio generation: {str(e)}', 'danger')
+        
+        # Make sure to reset episode status
+        try:
+            episode = models.Episode.query.get(id)
+            if episode:
+                episode.status = "script_generated"  # Revert to previous state
+                db.session.commit()
+        except:
+            pass
+            
         return redirect(url_for('episode', id=id))
+
+@app.route('/audio_status/<int:id>/<task_id>')
+@login_required
+def audio_generation_status(id, task_id):
+    """Show status of audio generation"""
+    episode = models.Episode.query.get_or_404(id)
+    
+    from background_task import get_task_status, get_task_result
+    
+    # Get the status of the task
+    status = get_task_status(task_id)
+    
+    # If the task is complete, redirect to the episode page
+    if status and status.get('status') == 'completed':
+        flash('Podcast audio generated successfully!', 'success')
+        return redirect(url_for('episode', id=id))
+    
+    # If the task failed, show an error
+    if status and status.get('status') == 'failed':
+        error_message = status.get('error', 'Unknown error')
+        flash(f'Audio generation failed: {error_message}', 'danger')
+        return redirect(url_for('episode', id=id))
+    
+    # Otherwise, render a template showing the progress
+    return render_template(
+        'audio_status.html', 
+        episode=episode, 
+        task_id=task_id, 
+        status=status
+    )
+
+@app.route('/api/task_status/<task_id>')
+@login_required
+def task_status_api(task_id):
+    """API endpoint for getting task status"""
+    from background_task import get_task_status
+    import logging
+    
+    # Log the request for debugging
+    logging.info(f"Task status request received for task_id: {task_id}")
+    
+    try:
+        # Get the status of the task
+        status = get_task_status(task_id)
+        
+        # Log the response for debugging
+        logging.info(f"Returning task status for {task_id}: {status}")
+        
+        # Always return a valid JSON response
+        if not status or not isinstance(status, dict):
+            logging.warning(f"Invalid status returned for task {task_id}: {status}")
+            return jsonify({
+                'status': 'unknown',
+                'progress': 0,
+                'message': 'Task status information not available',
+                'error': 'Task status retrieval failed'
+            }), 404
+        
+        return jsonify(status)
+    
+    except Exception as e:
+        # Log the error
+        error_msg = f"Error retrieving task status: {str(e)}"
+        logging.error(error_msg)
+        
+        # Return a fallback response
+        return jsonify({
+            'status': 'error',
+            'progress': 0,
+            'message': 'Error retrieving task status',
+            'error': str(e)
+        }), 500
 
 @app.route('/audio/<path:date>/<filename>')
 @login_required
@@ -954,9 +1317,101 @@ def serve_audio(date, filename):
     """Serve audio files from storage directories"""
     return send_from_directory(f'storage/{date}', filename)
 
+@app.route('/delete_audio/<int:id>')
+@login_required
+def delete_audio(id):
+    """Delete audio file for an episode"""
+    episode = models.Episode.query.get_or_404(id)
+    
+    # Check if the episode belongs to the current user's podcasts
+    podcast = models.Settings.query.get_or_404(episode.podcast_id)
+    if podcast.user_id != current_user.id and not current_user.is_admin:
+        flash('You do not have permission to delete this audio file.', 'danger')
+        return redirect(url_for('episode', id=id))
+    
+    if episode.audio_path:
+        try:
+            # Get audio file path
+            date_folder = episode.audio_path.split('/')[1]
+            audio_path = os.path.join('storage', date_folder, 'podcast.mp3')
+            
+            # Delete the audio file if it exists
+            if os.path.exists(audio_path):
+                os.remove(audio_path)
+                logging.info(f"Deleted audio file: {audio_path}")
+            
+            # Update episode status
+            if episode.status == 'published':
+                # If published, keep track that it was published but audio is now deleted
+                episode.status = 'published_no_audio'
+            else:
+                # If not published, revert to script_generated status
+                episode.status = 'script_generated'
+            
+            # Clear audio_path
+            episode.audio_path = None
+            db.session.commit()
+            
+            flash('Audio file deleted successfully.', 'success')
+        except Exception as e:
+            logging.error(f"Error deleting audio file: {str(e)}")
+            flash(f'Error deleting audio file: {str(e)}', 'danger')
+    else:
+        flash('No audio file found for this episode.', 'warning')
+    
+    return redirect(url_for('episode', id=id))
+
+@app.route('/delete_episode/<int:id>')
+@login_required
+def delete_episode(id):
+    """Delete an episode"""
+    episode = models.Episode.query.get_or_404(id)
+    
+    # Check if the episode belongs to the current user's podcasts
+    podcast = models.Settings.query.get_or_404(episode.podcast_id)
+    if podcast.user_id != current_user.id and not current_user.is_admin:
+        flash('You do not have permission to delete this episode.', 'danger')
+        return redirect(url_for('index'))
+    
+    try:
+        # If episode has audio, delete the audio file first
+        if episode.audio_path:
+            try:
+                # Get audio file path
+                date_folder = episode.audio_path.split('/')[1]
+                audio_path = os.path.join('storage', date_folder, 'podcast.mp3')
+                
+                # Delete the audio file if it exists
+                if os.path.exists(audio_path):
+                    os.remove(audio_path)
+                    logging.info(f"Deleted audio file: {audio_path}")
+            except Exception as e:
+                logging.error(f"Error deleting audio file: {str(e)}")
+                # Continue with episode deletion even if audio file deletion fails
+        
+        # Store episode title for flash message
+        episode_title = episode.title
+        
+        # Delete the episode
+        db.session.delete(episode)
+        db.session.commit()
+        
+        flash(f'Episode "{episode_title}" deleted successfully.', 'success')
+    except Exception as e:
+        logging.error(f"Error deleting episode: {str(e)}")
+        flash(f'Error deleting episode: {str(e)}', 'danger')
+    
+    return redirect(url_for('index'))
+
 @app.route('/publish/<int:id>')
 @login_required
 def publish(id):
+    """
+    Publish a podcast episode to GitHub Pages
+    
+    Creates an RSS feed and uploads audio files to GitHub repository
+    to be served via GitHub Pages.
+    """
     try:
         episode = models.Episode.query.get_or_404(id)
         if not episode.audio_path:
@@ -989,6 +1444,12 @@ def publish(id):
             return redirect(url_for('settings', _anchor='nav-api-keys'))
         
         # Publish to GitHub
+        logging.info(f"Publishing episode {id} to GitHub Pages")
+        
+        # Get associated podcast settings
+        podcast_settings = episode.settings  # This should be accessible through the relationship
+        podcast_title = podcast_settings.title if podcast_settings else "Daily Tech Insights"
+        
         success, url = publish_to_github(
             episode, 
             github_token, 
@@ -1003,9 +1464,11 @@ def publish(id):
             episode.publish_date = datetime.now()
             db.session.commit()
             
-            flash('Podcast published to GitHub Pages successfully!', 'success')
+            flash(f'Podcast "{episode.title}" published successfully! Accessible at: <a href="{url}" target="_blank">{url}</a>', 'success')
+            logging.info(f"Episode {id} published successfully to {url}")
         else:
             flash(f'Error publishing to GitHub: {url}', 'danger')
+            logging.error(f"Failed to publish episode {id}: {url}")
             
         return redirect(url_for('episode', id=id))
     
