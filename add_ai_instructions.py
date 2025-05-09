@@ -7,13 +7,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Database configuration
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL_PLACEHOLDER = os.environ.get("DATABASE_URL_PLACEHOLDER")
 
 def add_ai_instructions_column():
     """Add ai_instructions column to settings table"""
     try:
         # Create engine and connect
-        engine = create_engine(DATABASE_URL)
+        engine = create_engine(DATABASE_URL_PLACEHOLDER)
         conn = engine.connect()
         
         # Check if column exists

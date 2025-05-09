@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-header bg-primary bg-opacity-10">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0"><i class="fas fa-microphone-alt me-2"></i>Create New Episode</h4>
+                        <h4 class="mb-0"><i class="fas fa-microphone-alt me-2"></i>Generate New Episode</h4>
                         <a href="{{ url_for('new_podcast') }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-plus-circle me-1"></i> Create New Podcast
                         </a>
@@ -17,14 +17,25 @@
                 </div>
                 <div class="card-body">
                     {% if podcasts %}
-                        <p class="mb-4">Select the podcast you want to generate content for:</p>
+                        <p class="mb-4">Select one or more podcasts to generate content for simultaneously:</p>
+                        
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i> <strong>New Feature:</strong> You can now generate multiple podcasts at once! Select as many as you'd like.
+                        </div>
+                        
+                        <div class="d-flex justify-content-end mb-3">
+                            <div class="btn-group" role="group">
+                                <button type="button" id="checkAllBtn" class="btn btn-sm btn-outline-secondary">Check All</button>
+                                <button type="button" id="uncheckAllBtn" class="btn btn-sm btn-outline-secondary">Uncheck All</button>
+                            </div>
+                        </div>
                         
                         <form method="POST" action="{{ url_for('generate_podcast') }}">
                             <div class="row">
                                 {% for podcast in podcasts %}
                                 <div class="col-md-6 mb-3">
                                     <div class="card h-100 podcast-select-card">
-                                        <input type="radio" name="podcast_id" value="{{ podcast.id }}" id="podcast_{{ podcast.id }}" class="visually-hidden podcast-select-input" required>
+                                        <input type="checkbox" name="podcast_ids[]" value="{{ podcast.id }}" id="podcast_{{ podcast.id }}" class="visually-hidden podcast-select-input" checked>
                                         <label for="podcast_{{ podcast.id }}" class="podcast-select-label h-100">
                                             <div class="card-body text-center">
                                                 {% if podcast.cover_art_path %}
@@ -53,19 +64,66 @@
                                     When you click generate, the system will:
                                 </p>
                                 <ol class="mb-0 ms-3 mt-2">
-                                    <li>Fetch the latest articles from your active RSS feeds</li>
-                                    <li>Use OpenAI to generate a podcast script</li>
-                                    <li>Create a new episode that you can later convert to audio</li>
+                                    <li>Process each selected podcast in parallel</li>
+                                    <li>Fetch the latest articles from each podcast's active RSS feeds</li>
+                                    <li>Use OpenAI to generate podcast scripts based on each podcast's settings</li>
+                                    <li>Generate new episodes that you can later convert to audio</li>
                                 </ol>
+                                <p class="mt-2 mb-0 small"><strong>Tip:</strong> You can select multiple podcasts to generate content for all of them at once!</p>
+                            </div>
+                            
+                            <div class="alert alert-warning mt-3">
+                                <h5><i class="fas fa-coins me-2"></i>Estimated Cost</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-2">Script Generation (OpenAI):</h6>
+                                        <ul class="mb-0 small">
+                                            <li>GPT-3.5 Turbo: ~$0.10-0.30 per podcast</li>
+                                            <li>GPT-4: ~$0.50-1.50 per podcast</li>
+                                            <li>GPT-4 Turbo: ~$0.25-0.75 per podcast</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="mb-2">Audio Generation (ElevenLabs):</h6>
+                                        <ul class="mb-0 small">
+                                            <li>Average 10-min podcast: ~$0.50-1.00</li>
+                                            <li>Based on character count & voice settings</li>
+                                            <li>Higher stability settings increase cost</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="mt-2 small text-dark">
+                                    <strong>Note:</strong> Actual costs vary based on content length, model selection, and voice settings. 
+                                    This step only generates the script (OpenAI cost). Audio generation costs are incurred separately when you click "Generate Audio".
+                                </div>
                             </div>
                             
                             <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-microphone-alt me-2"></i> Generate New Episode Content
+                                <button type="submit" id="generatePodcastBtn" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-microphone-alt me-2"></i> Generate New Episodes
                                 </button>
                                 <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Back to Home</a>
                             </div>
                         </form>
+                        
+                        <!-- Progress Bar Modal for Podcast Generation -->
+                        <div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="progressModalLabel">Generating Podcasts...</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p id="progressDescription">Please wait while we fetch articles and generate your podcast scripts.</p>
+                                        <div class="progress" style="height: 20px;">
+                                            <div id="podcastProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0%</div>
+                                        </div>
+                                        <div id="currentStep" class="mt-2 text-muted small">Initializing...</div>
+                                        <p class="mt-3 small text-muted">This process may take several minutes depending on the number of podcasts, RSS feeds, and podcast lengths.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     {% else %}
                         <div class="alert alert-warning">
                             <p>You don't have any podcasts yet. Please create a podcast first.</p>
@@ -115,19 +173,221 @@
     // JavaScript to enhance the podcast selection UI
     document.addEventListener('DOMContentLoaded', function() {
         const cards = document.querySelectorAll('.podcast-select-card');
+        const checkboxes = document.querySelectorAll('input[name="podcast_ids[]"]');
+        const checkAllBtn = document.getElementById('checkAllBtn');
+        const uncheckAllBtn = document.getElementById('uncheckAllBtn');
+        
+        // Check all podcasts button
+        checkAllBtn.addEventListener('click', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateCardStyles();
+        });
+        
+        // Uncheck all podcasts button
+        uncheckAllBtn.addEventListener('click', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateCardStyles();
+        });
+        
+        // Function to update card styles based on checkbox state
+        function updateCardStyles() {
+            checkboxes.forEach(checkbox => {
+                const card = checkbox.closest('.podcast-select-card');
+                if (checkbox.checked) {
+                    card.classList.add('border-primary');
+                } else {
+                    card.classList.remove('border-primary');
+                }
+            });
+        }
+        
+        // Initialize card styles
+        updateCardStyles();
         
         cards.forEach(card => {
             card.addEventListener('click', function() {
-                const input = this.querySelector('input[type="radio"]');
-                input.checked = true;
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
                 
-                // Remove selected class from all cards
-                cards.forEach(c => c.classList.remove('border-primary'));
+                // Update card style
+                if (checkbox.checked) {
+                    this.classList.add('border-primary');
+                } else {
+                    this.classList.remove('border-primary');
+                }
+            });
+        });
+        
+        // Add event listener to the form
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();  // Prevent normal form submission
+            
+            // Check if at least one podcast is selected
+            const selectedPodcasts = document.querySelectorAll('input[name="podcast_ids[]"]:checked');
+            if (selectedPodcasts.length === 0) {
+                alert('Please select at least one podcast');
+                return false;
+            }
+            
+            // Show loading modal
+            const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
+            progressModal.show();
+            
+            // Get the form data
+            const formData = new FormData(form);
+            
+            // Initialize progress animation
+            const progressBar = document.getElementById('podcastProgress');
+            const currentStepElement = document.getElementById('currentStep');
+            let progress = 0;
+            
+            // Steps in the process
+            const steps = [
+                { progress: 10, message: "Connecting to RSS feeds..." },
+                { progress: 30, message: "Fetching latest articles..." },
+                { progress: 50, message: "Processing content..." },
+                { progress: 70, message: "Generating podcast script..." },
+                { progress: 90, message: "Finalizing episode..." }
+            ];
+            
+            let currentStepIndex = 0;
+            
+            // Simulate progress while actual processing happens
+            const interval = setInterval(function() {
+                if (progress < steps[currentStepIndex].progress) {
+                    progress += 1;
+                    
+                    // Update the progress bar
+                    progressBar.style.width = progress + '%';
+                    progressBar.setAttribute('aria-valuenow', progress);
+                    progressBar.textContent = Math.round(progress) + '%';
+                    
+                    // Update step message
+                    currentStepElement.textContent = steps[currentStepIndex].message;
+                } else if (currentStepIndex < steps.length - 1) {
+                    currentStepIndex++;
+                }
                 
-                // Add selected class to clicked card
-                this.classList.add('border-primary');
+                if (progress >= 95) {
+                    clearInterval(interval);
+                    // At 95%, we'll wait for the actual server response
+                }
+            }, 200);
+            
+            // Count selected podcasts and update the progress description
+            const selectedCount = document.querySelectorAll('input[name="podcast_ids[]"]:checked').length;
+            const progressDescription = document.getElementById('progressDescription');
+            
+            if (selectedCount > 1) {
+                progressDescription.textContent = `Please wait while we generate ${selectedCount} podcasts. This may take longer than usual.`;
+                document.getElementById('progressModalLabel').textContent = `Generating ${selectedCount} Podcasts...`;
+            } else {
+                progressDescription.textContent = 'Please wait while we fetch articles and generate your podcast script.';
+                document.getElementById('progressModalLabel').textContent = 'Generating Podcast...';
+            }
+            
+            // Make the actual POST request to generate podcast(s)
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                clearInterval(interval);
+                
+                if (response.ok) {
+                    // Set progress to 100%
+                    progressBar.style.width = '100%';
+                    progressBar.setAttribute('aria-valuenow', 100);
+                    progressBar.textContent = '100%';
+                    
+                    if (selectedCount > 1) {
+                        currentStepElement.textContent = `${selectedCount} podcasts generated successfully!`;
+                    } else {
+                        currentStepElement.textContent = "Podcast generated successfully!";
+                    }
+                    
+                    // Add success class
+                    progressBar.classList.remove('bg-primary');
+                    progressBar.classList.add('bg-success');
+                    
+                    // Redirect to result page
+                    setTimeout(function() {
+                        window.location.href = response.url;
+                    }, 1000);
+                } else {
+                    // Handle error
+                    progressBar.classList.remove('bg-primary');
+                    progressBar.classList.add('bg-danger');
+                    
+                    if (selectedCount > 1) {
+                        document.getElementById('progressModalLabel').textContent = 'Error Generating Podcasts';
+                    } else {
+                        document.getElementById('progressModalLabel').textContent = 'Error Generating Podcast';
+                    }
+                    
+                    // Add a close button to the modal
+                    const modalHeader = document.querySelector('#progressModal .modal-header');
+                    if (!modalHeader.querySelector('.btn-close')) {
+                        const closeButton = document.createElement('button');
+                        closeButton.type = 'button';
+                        closeButton.className = 'btn-close';
+                        closeButton.setAttribute('data-bs-dismiss', 'modal');
+                        closeButton.setAttribute('aria-label', 'Close');
+                        modalHeader.appendChild(closeButton);
+                    }
+                    
+                    response.text().then(errorText => {
+                        const errorMessage = document.createElement('div');
+                        errorMessage.className = 'alert alert-danger mt-3';
+                        
+                        // Try to extract error message from HTML response
+                        if (errorText.includes('<div class="alert alert-danger">')) {
+                            const startIndex = errorText.indexOf('<div class="alert alert-danger">') + 30;
+                            const endIndex = errorText.indexOf('</div>', startIndex);
+                            errorMessage.textContent = "Error: " + errorText.substring(startIndex, endIndex).trim();
+                        } else {
+                            if (selectedCount > 1) {
+                                errorMessage.textContent = "Error generating podcasts. Please try again.";
+                            } else {
+                                errorMessage.textContent = "Error generating podcast. Please try again.";
+                            }
+                        }
+                        
+                        document.querySelector('#progressModal .modal-body').appendChild(errorMessage);
+                    });
+                }
+            })
+            .catch(error => {
+                clearInterval(interval);
+                progressBar.classList.remove('bg-primary');
+                progressBar.classList.add('bg-danger');
+                document.getElementById('progressModalLabel').textContent = 'Error';
+                currentStepElement.textContent = "Failed to connect to server";
+                
+                // Add a close button to the modal
+                const modalHeader = document.querySelector('#progressModal .modal-header');
+                if (!modalHeader.querySelector('.btn-close')) {
+                    const closeButton = document.createElement('button');
+                    closeButton.type = 'button';
+                    closeButton.className = 'btn-close';
+                    closeButton.setAttribute('data-bs-dismiss', 'modal');
+                    closeButton.setAttribute('aria-label', 'Close');
+                    modalHeader.appendChild(closeButton);
+                }
+                
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'alert alert-danger mt-3';
+                errorMessage.textContent = "Network error: " + error.message;
+                document.querySelector('#progressModal .modal-body').appendChild(errorMessage);
             });
         });
     });
+    
+    // Note: Progress animation is now handled directly in the form submission event handler
 </script>
 {% endblock %}

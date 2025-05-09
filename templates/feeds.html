@@ -98,16 +98,701 @@
 
 <div class="row mt-4">
     <div class="col-12">
-        <div class="alert alert-info">
-            <h5 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Recommended Tech News Sources</h5>
-            <p>Here are some popular tech news RSS feeds you can add:</p>
-            <ul class="list-unstyled">
-                <li><i class="fas fa-rss me-2"></i> Hacker News: <code>https://news.ycombinator.com/rss</code></li>
-                <li><i class="fas fa-rss me-2"></i> TechCrunch: <code>https://techcrunch.com/feed/</code></li>
-                <li><i class="fas fa-rss me-2"></i> The Verge: <code>https://www.theverge.com/rss/index.xml</code></li>
-                <li><i class="fas fa-rss me-2"></i> Wired: <code>https://www.wired.com/feed/rss</code></li>
-                <li><i class="fas fa-rss me-2"></i> Ars Technica: <code>https://arstechnica.com/feed/</code></li>
-            </ul>
+        <div class="card">
+            <div class="card-header bg-info bg-opacity-25">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Recommended RSS Feed Sources</h5>
+            </div>
+            <div class="card-body">
+                <p>Add diverse content to your podcasts with these popular RSS feeds:</p>
+                
+                <!-- Tab navigation for feed categories -->
+                <ul class="nav nav-tabs mb-4" id="feedCategoryTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tech-tab" data-bs-toggle="tab" data-bs-target="#tech" type="button" role="tab" aria-controls="tech" aria-selected="true">
+                            <i class="fas fa-microchip me-1"></i> Technology
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab" aria-controls="business" aria-selected="false">
+                            <i class="fas fa-chart-line me-1"></i> Business
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="science-tab" data-bs-toggle="tab" data-bs-target="#science" type="button" role="tab" aria-controls="science" aria-selected="false">
+                            <i class="fas fa-flask me-1"></i> Science
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab" aria-controls="news" aria-selected="false">
+                            <i class="fas fa-newspaper me-1"></i> News
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="entertainment-tab" data-bs-toggle="tab" data-bs-target="#entertainment" type="button" role="tab" aria-controls="entertainment" aria-selected="false">
+                            <i class="fas fa-gamepad me-1"></i> Entertainment
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="health-tab" data-bs-toggle="tab" data-bs-target="#health" type="button" role="tab" aria-controls="health" aria-selected="false">
+                            <i class="fas fa-heartbeat me-1"></i> Health
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="more-tab" data-bs-toggle="tab" data-bs-target="#more" type="button" role="tab" aria-controls="more" aria-selected="false">
+                            <i class="fas fa-ellipsis-h me-1"></i> More
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tab content for feed categories -->
+                <div class="tab-content mb-4" id="feedCategoryTabsContent">
+                    <!-- Technology Tab -->
+                    <div class="tab-pane fade show active" id="tech" role="tabpanel" aria-labelledby="tech-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-microchip me-2"></i>General Tech News</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Hacker News: <code>https://news.ycombinator.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> TechCrunch: <code>https://techcrunch.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Verge: <code>https://www.theverge.com/rss/index.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Wired: <code>https://www.wired.com/feed/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Ars Technica: <code>https://arstechnica.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MIT Technology Review: <code>https://www.technologyreview.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CNET: <code>https://www.cnet.com/rss/all/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Engadget: <code>https://www.engadget.com/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Gizmodo: <code>https://gizmodo.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> ZDNet: <code>https://www.zdnet.com/news/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Slashdot: <code>https://rss.slashdot.org/Slashdot/slashdotMain</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Digital Trends: <code>https://www.digitaltrends.com/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Artificial Intelligence</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> AI News: <code>https://artificialintelligence-news.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> OpenAI Blog: <code>https://openai.com/blog/rss/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Google AI Blog: <code>https://ai.googleblog.com/feeds/posts/default</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Towards Data Science: <code>https://towardsdatascience.com/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MIT AI News: <code>https://news.mit.edu/topic/artificial-intelligence2-rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Hugging Face Blog: <code>https://huggingface.co/blog/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> DeepMind: <code>https://deepmind.com/blog/feed/basic/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> AI Alignment Forum: <code>https://www.alignmentforum.org/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Machine Learning Mastery: <code>https://machinelearningmastery.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Kaggle Blog: <code>https://medium.com/feed/kaggle-blog</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Data Science Central: <code>https://www.datasciencecentral.com/profiles/blog/feed</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-code me-2"></i>Developer News</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> DEV Community: <code>https://dev.to/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> GitHub Blog: <code>https://github.blog/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Stack Overflow Blog: <code>https://stackoverflow.blog/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CSS-Tricks: <code>https://css-tricks.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Smashing Magazine: <code>https://www.smashingmagazine.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> InfoQ: <code>https://feed.infoq.com/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Hacker Noon: <code>https://hackernoon.com/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> freeCodeCamp: <code>https://www.freecodecamp.org/news/rss/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CodePen Blog: <code>https://blog.codepen.io/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Cybersecurity</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Krebs on Security: <code>https://krebsonsecurity.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Hacker News: <code>https://feeds.feedburner.com/TheHackersNews</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Threatpost: <code>https://threatpost.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Dark Reading: <code>https://www.darkreading.com/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Naked Security: <code>https://nakedsecurity.sophos.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Schneier on Security: <code>https://www.schneier.com/feed/atom/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> BleepingComputer: <code>https://www.bleepingcomputer.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Security Weekly: <code>https://securityweekly.com/feed/podcast</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CISA: <code>https://www.cisa.gov/news.xml</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Business Tab -->
+                    <div class="tab-pane fade" id="business" role="tabpanel" aria-labelledby="business-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Business & Finance</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Forbes: <code>https://www.forbes.com/business/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CNBC: <code>https://www.cnbc.com/id/100003114/device/rss/rss.html</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Economist: <code>https://www.economist.com/finance-and-economics/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Harvard Business Review: <code>https://hbr.org/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Bloomberg: <code>https://feeds.bloomberg.com/markets/news.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Financial Times: <code>https://www.ft.com/rss/home</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Wall Street Journal: <code>https://feeds.a.dj.com/rss/RSSMarketsMain.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Fast Company: <code>https://www.fastcompany.com/latest/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Inc.: <code>https://www.inc.com/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Entrepreneur: <code>https://www.entrepreneur.com/latest.rss</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-coins me-2"></i>Investing & Markets</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Seeking Alpha: <code>https://seekingalpha.com/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Investopedia: <code>https://www.investopedia.com/feedbuilder/feed/getfeed?feedName=rss_headline</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Motley Fool: <code>https://www.fool.com/a/feeds/foolwatch</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MarketWatch: <code>https://feeds.marketwatch.com/marketwatch/topstories/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Yahoo Finance: <code>https://finance.yahoo.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Barron's: <code>https://www.barrons.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Business Insider: <code>https://www.businessinsider.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Street: <code>https://www.thestreet.com/feeds/rss/all-stories.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Morningstar: <code>https://www.morningstar.com/rss</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Startups & Entrepreneurship</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> TechCrunch Startups: <code>https://techcrunch.com/category/startups/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> VentureBeat: <code>https://venturebeat.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Y Combinator: <code>https://blog.ycombinator.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Indie Hackers: <code>https://www.indiehackers.com/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> StartupDigest: <code>https://www.startupdigest.com/digests/developer/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Starter Story: <code>https://www.starterstory.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Crunchbase News: <code>https://news.crunchbase.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> A16Z Blog: <code>https://a16z.com/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Careers & Leadership</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Harvard Business Review Leadership: <code>https://hbr.org/topic/leadership/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> McKinsey Insights: <code>https://www.mckinsey.com/insights/rss.aspx</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Forbes Leadership: <code>https://www.forbes.com/leadership/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Chief Executive: <code>https://chiefexecutive.net/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MIT Sloan Management: <code>https://sloanreview.mit.edu/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Muse: <code>https://www.themuse.com/advice/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Glassdoor Blog: <code>https://www.glassdoor.com/blog/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Science Tab -->
+                    <div class="tab-pane fade" id="science" role="tabpanel" aria-labelledby="science-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-flask me-2"></i>General Science</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Scientific American: <code>https://rss.sciam.com/ScientificAmerican-Global</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> New Scientist: <code>https://www.newscientist.com/feed/home/?cmpid=RSS</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Nature: <code>https://www.nature.com/nature.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Science Magazine: <code>https://www.science.org/rss/news_current.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Science Daily: <code>https://www.sciencedaily.com/rss/all.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Live Science: <code>https://www.livescience.com/feeds/all</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Scientist: <code>https://www.the-scientist.com/rss/all/all</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Science News: <code>https://www.sciencenews.org/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> PLOS: <code>https://journals.plos.org/plosone/feed/atom</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Quanta Magazine: <code>https://api.quantamagazine.org/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Space & Astronomy</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NASA: <code>https://www.nasa.gov/rss/dyn/breaking_news.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Space.com: <code>https://www.space.com/feeds/all</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Universe Today: <code>https://www.universetoday.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> SpaceX News: <code>https://www.spacex.com/news.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Astronomy.com: <code>https://astronomy.com/rss/news</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> ESA: <code>https://www.esa.int/rssfeed/Our_Activities/Space_News</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Planetary Society: <code>https://www.planetary.org/feeds/planetary-radio</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Astronomy Now: <code>https://astronomynow.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NASA Exoplanet: <code>https://exoplanets.nasa.gov/rss/rss.xml</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-dna me-2"></i>Biology & Medicine</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Cell Press: <code>https://www.cell.com/cell/current.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> JAMA Network: <code>https://jamanetwork.com/rss/site_3/67.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> New England Journal of Medicine: <code>https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> National Institutes of Health: <code>https://www.nih.gov/news-events/news-releases/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Gene Therapy Net: <code>https://www.genetherapynet.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The BMJ: <code>https://www.bmj.com/content/rss/abridged.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> GEN News: <code>https://www.genengnews.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Genome Web: <code>https://www.genomeweb.com/rss/all</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-atom me-2"></i>Physics & Mathematics</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Physics World: <code>https://physicsworld.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Physics Today: <code>https://physicstoday.scitation.org/action/showFeed?type=etoc&feed=rss&jc=pto</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> American Physical Society: <code>https://journals.aps.org/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Mathematical Association of America: <code>https://www.maa.org/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Fermilab News: <code>https://news.fnal.gov/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CERN: <code>https://home.cern/api/feeds/news/feed.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Symmetry Magazine: <code>https://www.symmetrymagazine.org/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Numberphile: <code>https://www.youtube.com/feeds/videos.xml?channel_id=UCoxcjq-8xIDTYp3uz647V5A</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- News Tab -->
+                    <div class="tab-pane fade" id="news" role="tabpanel" aria-labelledby="news-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i>Global News</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NPR: <code>https://feeds.npr.org/1001/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> BBC: <code>https://feeds.bbci.co.uk/news/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Reuters: <code>https://feeds.reuters.com/reuters/topNews</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Associated Press: <code>https://feeds.feedburner.com/BreakingNews-Latest</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Guardian: <code>https://www.theguardian.com/world/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CNN: <code>http://rss.cnn.com/rss/cnn_topstories.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Al Jazeera: <code>https://www.aljazeera.com/xml/rss/all.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Washington Post: <code>https://feeds.washingtonpost.com/rss/world</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The New York Times: <code>https://rss.nytimes.com/services/xml/rss/nyt/World.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Deutsche Welle: <code>https://rss.dw.com/rdf/rss-en-all</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> EuroNews: <code>https://www.euronews.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> France 24: <code>https://www.france24.com/en/rss</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Business News</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Financial Times: <code>https://www.ft.com/rss/home</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Wall Street Journal: <code>https://feeds.a.dj.com/rss/RSSWorldNews.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Bloomberg: <code>https://feeds.bloomberg.com/markets/news.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CNBC: <code>https://www.cnbc.com/id/100003114/device/rss/rss.html</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Economist: <code>https://www.economist.com/finance-and-economics/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Forbes Business: <code>https://www.forbes.com/business/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Business Insider: <code>https://www.businessinsider.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MarketWatch: <code>https://feeds.marketwatch.com/marketwatch/topstories/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Reuters Business: <code>https://feeds.reuters.com/reuters/businessNews</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-podcast me-2"></i>News Podcasts</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NPR Up First: <code>https://feeds.npr.org/510318/podcast.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Daily (NYT): <code>https://rss.art19.com/the-daily</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> BBC Global News Podcast: <code>https://podcasts.files.bbci.co.uk/p02nq0gn.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Today, Explained: <code>https://feeds.megaphone.fm/VMP5705694065</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Journal: <code>https://video-api.wsj.com/podcast/rss/wsj/the-journal</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> AP News Headlines: <code>https://feeds.megaphone.fm/KM6906564467</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Intelligence: <code>https://rss.acast.com/theeconomisttheexplainerpodcast</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Consider This: <code>https://feeds.npr.org/510355/podcast.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Indicator: <code>https://feeds.npr.org/510325/podcast.xml</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-globe me-2"></i>Regional News</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> South China Morning Post: <code>https://www.scmp.com/rss/91/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Times of India: <code>https://timesofindia.indiatimes.com/rssfeedstopstories.cms</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Japan Times: <code>https://www.japantimes.co.jp/feed/topstories/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Straits Times: <code>https://www.straitstimes.com/asia/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Sydney Morning Herald: <code>https://www.smh.com.au/rss/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CBC Canada: <code>https://rss.cbc.ca/lineup/topstories.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> El País (English): <code>https://english.elpais.com/rss/english_edition/global.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> RT News: <code>https://www.rt.com/rss/news/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Irish Times: <code>https://www.irishtimes.com/rss/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Entertainment Tab -->
+                    <div class="tab-pane fade" id="entertainment" role="tabpanel" aria-labelledby="entertainment-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Gaming</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Polygon: <code>https://www.polygon.com/rss/index.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> IGN: <code>https://feeds.feedburner.com/ign/all</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Kotaku: <code>https://kotaku.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> PC Gamer: <code>https://www.pcgamer.com/rss/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Game Informer: <code>https://www.gameinformer.com/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Eurogamer: <code>https://www.eurogamer.net/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Rock Paper Shotgun: <code>https://www.rockpapershotgun.com/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Gamasutra: <code>https://www.gamasutra.com/rss/index.php</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> GameSpot: <code>https://www.gamespot.com/feeds/mashup/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Nintendo Life: <code>https://www.nintendolife.com/feeds/latest</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> PlayStation Blog: <code>https://blog.playstation.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Xbox Wire: <code>https://news.xbox.com/en-us/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-film me-2"></i>Movies & TV</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Variety: <code>https://variety.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Hollywood Reporter: <code>https://www.hollywoodreporter.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Deadline: <code>https://deadline.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Screen Rant: <code>https://screenrant.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Entertainment Weekly: <code>https://ew.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> ComingSoon.net: <code>https://www.comingsoon.net/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> IndieWire: <code>https://www.indiewire.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> /Film: <code>https://www.slashfilm.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Collider: <code>https://collider.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The A.V. Club: <code>https://www.avclub.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Roger Ebert: <code>https://www.rogerebert.com/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MovieWeb: <code>https://movieweb.com/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-music me-2"></i>Music</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Pitchfork: <code>https://pitchfork.com/rss/news/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Rolling Stone: <code>https://www.rollingstone.com/music/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Consequence of Sound: <code>https://consequenceofsound.net/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Billboard: <code>https://www.billboard.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NPR Music: <code>https://feeds.npr.org/1039/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NME: <code>https://www.nme.com/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Stereogum: <code>https://www.stereogum.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The FADER: <code>https://www.thefader.com/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Bandcamp Daily: <code>https://daily.bandcamp.com/feed</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-book me-2"></i>Books & Literature</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NY Times Books: <code>https://rss.nytimes.com/services/xml/rss/nyt/Books.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Guardian Books: <code>https://www.theguardian.com/books/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NPR Books: <code>https://feeds.npr.org/1032/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Literary Hub: <code>https://lithub.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Electric Literature: <code>https://electricliterature.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Book Riot: <code>https://bookriot.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Publishers Weekly: <code>https://www.publishersweekly.com/pw/feeds/articles.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Tor.com: <code>https://www.tor.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Paris Review: <code>https://www.theparisreview.org/feed</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Health Tab -->
+                    <div class="tab-pane fade" id="health" role="tabpanel" aria-labelledby="health-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Health & Medicine</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Harvard Health: <code>https://www.health.harvard.edu/blog/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> WebMD: <code>https://rssfeeds.webmd.com/rss/rss.aspx?RSSSource=RSS_PUBLIC</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Medical News Today: <code>https://www.medicalnewstoday.com/newsfeeds/rss/medical_news_today.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Healthline: <code>https://www.healthline.com/rss/all</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> CDC: <code>https://tools.cdc.gov/api/v2/resources/media/132608.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Psychology Today: <code>https://www.psychologytoday.com/us/front/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Mayo Clinic: <code>https://www.mayoclinic.org/rss/all-health-information-topics</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MedPage Today: <code>https://www.medpagetoday.com/rss/headlines.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NIH News: <code>https://www.nih.gov/news-events/news-releases/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Johns Hopkins Medicine: <code>https://www.hopkinsmedicine.org/news/media/releases/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> World Health Organization: <code>https://www.who.int/feeds/entity/mediacentre/news/en/rss.xml</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-running me-2"></i>Fitness & Wellness</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Shape Magazine: <code>https://www.shape.com/feeds/all/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Men's Health: <code>https://www.menshealth.com/feeds/all/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Women's Health: <code>https://www.womenshealthmag.com/feeds/all/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Runner's World: <code>https://www.runnersworld.com/feeds/all/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Yoga Journal: <code>https://www.yogajournal.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Self: <code>https://www.self.com/feed/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Prevention: <code>https://www.prevention.com/feeds/all/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Muscle & Fitness: <code>https://www.muscleandfitness.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Mindbodygreen: <code>https://www.mindbodygreen.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> HealthPrep: <code>https://healthprep.com/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Mental Health</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Psychology Today: <code>https://www.psychologytoday.com/us/front/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NAMI Blog: <code>https://www.nami.org/About-NAMI/NAMI-News/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Mighty: <code>https://themighty.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> ADDitude: <code>https://www.additudemag.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Psych Central: <code>https://psychcentral.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Very Well Mind: <code>https://www.verywellmind.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Mindful: <code>https://www.mindful.org/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Child Mind Institute: <code>https://childmind.org/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-utensils me-2"></i>Nutrition & Diet</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> EatingWell: <code>https://www.eatingwell.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Nutrition.gov: <code>https://www.nutrition.gov/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Eat This, Not That: <code>https://www.eatthis.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Precision Nutrition: <code>https://www.precisionnutrition.com/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Nutrition Facts: <code>https://nutritionfacts.org/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MyFitnessPal Blog: <code>https://blog.myfitnesspal.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Diabetic Living: <code>https://www.diabeticlivingonline.com/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> American Heart Association: <code>https://newsroom.heart.org/rss</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- More Tab -->
+                    <div class="tab-pane fade" id="more" role="tabpanel" aria-labelledby="more-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-globe me-2"></i>Environment & Sustainability</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> National Geographic: <code>https://www.nationalgeographic.com/environment/rss/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> EcoWatch: <code>https://www.ecowatch.com/feeds/latest.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Treehugger: <code>https://www.treehugger.com/feeds/all.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Inside Climate News: <code>https://insideclimatenews.org/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Green Matters: <code>https://www.greenmatters.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> NRDC: <code>https://www.nrdc.org/stories/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Grist: <code>https://grist.org/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Yale Environment 360: <code>https://e360.yale.edu/feed.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Earther: <code>https://earther.gizmodo.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Climate Home News: <code>https://www.climatechangenews.com/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-utensils me-2"></i>Food & Cooking</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Serious Eats: <code>https://feeds.feedburner.com/seriouseats/recipes</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Food52: <code>https://food52.com/blog.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Epicurious: <code>https://www.epicurious.com/feed/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Bon Appétit: <code>https://www.bonappetit.com/feed/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Simply Recipes: <code>https://www.simplyrecipes.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Kitchn: <code>https://www.thekitchn.com/main.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Saveur: <code>https://www.saveur.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Eater: <code>https://www.eater.com/rss/index.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Taste: <code>https://www.tastecooking.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> America's Test Kitchen: <code>https://www.americastestkitchen.com/feeds/recipes</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-plane me-2"></i>Travel</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Lonely Planet: <code>https://www.lonelyplanet.com/blog/feed/atom/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Condé Nast Traveler: <code>https://www.cntraveler.com/feed/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Travel + Leisure: <code>https://www.travelandleisure.com/feeds/all.rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> The Points Guy: <code>https://thepointsguy.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> National Geographic Travel: <code>https://www.nationalgeographic.com/travel/rss/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> BBC Travel: <code>http://feeds.bbci.co.uk/travel/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> AFAR: <code>https://www.afar.com/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Skift: <code>https://skift.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Atlas Obscura: <code>https://www.atlasobscura.com/feeds/latest</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark bg-opacity-25">
+                                        <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Education</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> EdSurge: <code>https://www.edsurge.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Inside Higher Ed: <code>https://www.insidehighered.com/rss.xml</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Chronicle of Higher Education: <code>https://www.chronicle.com/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Education Week: <code>https://www.edweek.org/ew/rss/index.html</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Edutopia: <code>https://www.edutopia.org/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Khan Academy: <code>https://www.khanacademy.org/rss</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> MindShift: <code>https://www.kqed.org/mindshift/feed</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> TeachThought: <code>https://www.teachthought.com/feed/</code></li>
+                                            <li class="mb-2"><i class="fas fa-rss me-2"></i> Education Next: <code>https://www.educationnext.org/feed/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feed recommendation tips -->
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-info-circle me-2"></i> Most websites provide RSS feeds. Look for the RSS icon <i class="fas fa-rss mx-1"></i> or check the website's footer for "RSS" or "Feed" links.
+                </div>
+                
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-info-circle me-2"></i> Most websites provide RSS feeds. Look for the RSS icon <i class="fas fa-rss mx-1"></i> or check the website's footer for "RSS" or "Feed" links.
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -21,8 +21,15 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="podcast_author" class="form-label">Author</label>
+                                    <label for="podcast_author" class="form-label">Podcast Author</label>
                                     <input type="text" class="form-control" id="podcast_author" name="podcast_author" value="{{ podcast.podcast_author }}" required>
+                                    <div class="form-text">The author name displayed in podcast platforms.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="host_name" class="form-label">Host Name</label>
+                                    <input type="text" class="form-control" id="host_name" name="host_name" value="{{ podcast.host_name }}" placeholder="e.g. Sarah Johnson">
+                                    <div class="form-text">The name of the podcast host mentioned in the script (if different from author).</div>
                                 </div>
                                 
                                 <div class="row">
@@ -66,21 +73,53 @@
                                     </div>
                                     <div class="form-text">Desired length of the podcast. Longer podcasts will include more detailed summaries and potentially more articles.</div>
                                 </div>
+                                
+                                <div class="mb-3">
+                                    <label for="openai_model" class="form-label">AI Model</label>
+                                    <select class="form-select" id="openai_model" name="openai_model">
+                                        <option value="gpt-3.5-turbo" {% if podcast.openai_model == 'gpt-3.5-turbo' %}selected{% endif %}>GPT-3.5 Turbo (Fast & Efficient)</option>
+                                        <option value="gpt-4" {% if podcast.openai_model == 'gpt-4' %}selected{% endif %}>GPT-4 (Advanced & Premium)</option>
+                                        <option value="gpt-4-turbo" {% if podcast.openai_model == 'gpt-4-turbo' %}selected{% endif %}>GPT-4 Turbo (Best Balance)</option>
+                                    </select>
+                                    <div class="form-text">AI model used for content generation. More advanced models provide better quality but cost more credits.</div>
+                                </div>
                             </div>
                             
                             <div class="col-md-4">
                                 <div class="mb-3 text-center">
                                     <label class="form-label d-block">Cover Art</label>
-                                    {% if podcast.cover_art_path %}
-                                        <img src="{{ url_for('static', filename=podcast.cover_art_path) }}" class="img-fluid mb-2 rounded" style="max-height: 200px;" alt="Cover Art">
-                                    {% else %}
-                                        <div class="bg-secondary text-white text-center p-5 mb-2 rounded">
-                                            <i class="fas fa-image fa-3x"></i>
-                                            <p class="mt-2">No Cover Art</p>
-                                        </div>
-                                    {% endif %}
-                                    <input type="file" class="form-control" id="cover_art" name="cover_art" accept="image/*">
+                                    <div id="cover-art-preview" class="mb-2 rounded">
+                                        {% if podcast.cover_art_path %}
+                                            <img src="{{ url_for('static', filename=podcast.cover_art_path) }}" class="img-fluid rounded" style="max-height: 200px;" alt="Cover Art">
+                                        {% else %}
+                                            <div class="bg-secondary text-white text-center p-5 rounded">
+                                                <i class="fas fa-image fa-3x"></i>
+                                                <p class="mt-2" id="cover-art-text">No Cover Art</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Cover art options -->
+                                    <div class="d-flex gap-2 mb-2">
+                                        <button type="button" class="btn btn-outline-primary flex-grow-1" id="generate-cover-btn">
+                                            <i class="fas fa-magic me-1"></i> Generate with AI
+                                        </button>
+                                        <label for="cover_art" class="btn btn-outline-secondary flex-grow-1 mb-0">
+                                            <i class="fas fa-upload me-1"></i> Upload
+                                        </label>
+                                    </div>
+                                    
+                                    <input type="file" class="form-control d-none" id="cover_art" name="cover_art" accept="image/*">
+                                    <input type="hidden" id="generated_cover_path" name="generated_cover_path">
                                     <div class="form-text">Recommended: 1400×1400 pixels, JPG or PNG</div>
+                                    
+                                    <!-- Cover generation progress -->
+                                    <div id="cover-generation-progress" class="mt-2 d-none">
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                                        </div>
+                                        <small class="text-muted">Generating cover art with DALL-E...</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -132,6 +171,19 @@
                                     <li>Focus on explaining technical concepts in simple terms</li>
                                     <li>Adopt a specific persona (e.g., "You are a cybersecurity expert with 20 years of experience")</li>
                                     <li>Use specific transitions or catchphrases</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="blocked_terms" class="form-label">Blocked Words & Terms <span class="text-muted">(Optional)</span></label>
+                            <textarea class="form-control" id="blocked_terms" name="blocked_terms" rows="3" placeholder="Enter terms separated by commas (e.g., politics, violence, controversial topics)">{{ podcast.blocked_terms }}</textarea>
+                            <div class="form-text">
+                                Words, phrases, or topics to exclude from your podcast. The system will filter out articles or content containing these terms.
+                                <ul class="mt-2">
+                                    <li>Enter multiple terms separated by commas</li>
+                                    <li>Case-insensitive matching will be applied</li>
+                                    <li>Can be used to block sensitive subjects or unwanted content</li>
                                 </ul>
                             </div>
                         </div>
@@ -333,5 +385,91 @@
                 });
         }
     }
+
+    // Cover art generation functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateCoverBtn = document.getElementById('generate-cover-btn');
+        const coverArtPreview = document.getElementById('cover-art-preview');
+        const coverGenerationProgress = document.getElementById('cover-generation-progress');
+        const podcastTitleInput = document.getElementById('podcast_title');
+        const podcastDescriptionInput = document.getElementById('podcast_description');
+        const generatedCoverPathInput = document.getElementById('generated_cover_path');
+        const fileInput = document.getElementById('cover_art');
+        
+        // Show uploaded image preview
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    coverArtPreview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="max-height: 200px;" alt="Cover Art">`;
+                    generatedCoverPathInput.value = ''; // Clear any generated path
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Generate cover art button
+        if (generateCoverBtn) {
+            generateCoverBtn.addEventListener('click', function() {
+                const title = podcastTitleInput.value.trim();
+                const description = podcastDescriptionInput.value.trim();
+                
+                if (!title) {
+                    alert('Please enter a podcast title first');
+                    podcastTitleInput.focus();
+                    return;
+                }
+                
+                if (!description) {
+                    alert('Please enter a podcast description first');
+                    podcastDescriptionInput.focus();
+                    return;
+                }
+                
+                // Show loading state
+                generateCoverBtn.disabled = true;
+                generateCoverBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Generating...';
+                coverGenerationProgress.classList.remove('d-none');
+                
+                // Make API request to generate cover
+                fetch('/generate_cover_art', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        podcast_title: title,
+                        podcast_description: description
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update preview with generated image
+                        coverArtPreview.innerHTML = `<img src="${data.image_url}" class="img-fluid rounded" style="max-height: 200px;" alt="Generated Cover Art">`;
+                        
+                        // Store the file path in the hidden input - critical for saving to DB
+                        generatedCoverPathInput.value = data.file_path;
+                        console.log("Cover art path set:", data.file_path);
+                        
+                        // Clear file input
+                        fileInput.value = '';
+                    } else {
+                        alert('Failed to generate cover art: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while generating cover art.');
+                })
+                .finally(() => {
+                    // Reset UI
+                    generateCoverBtn.disabled = false;
+                    generateCoverBtn.innerHTML = '<i class="fas fa-magic me-1"></i> Generate with AI';
+                    coverGenerationProgress.classList.add('d-none');
+                });
+            });
+        }
+    });
 </script>
 {% endblock %}

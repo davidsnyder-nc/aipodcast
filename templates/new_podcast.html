@@ -21,8 +21,15 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="podcast_author" class="form-label">Author</label>
+                                    <label for="podcast_author" class="form-label">Podcast Author</label>
                                     <input type="text" class="form-control" id="podcast_author" name="podcast_author" value="{{ current_user.username }}" required>
+                                    <div class="form-text">The author name displayed in podcast platforms.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="host_name" class="form-label">Host Name</label>
+                                    <input type="text" class="form-control" id="host_name" name="host_name" placeholder="e.g. Sarah Johnson">
+                                    <div class="form-text">The name of the podcast host mentioned in the script (if different from author).</div>
                                 </div>
                                 
                                 <div class="row">
@@ -66,17 +73,70 @@
                                     </div>
                                     <div class="form-text">Desired length of the podcast. Longer podcasts will include more detailed summaries and potentially more articles.</div>
                                 </div>
+                                
+                                <div class="mb-3">
+                                    <label for="openai_model" class="form-label">AI Model</label>
+                                    <select class="form-select" id="openai_model" name="openai_model">
+                                        <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo (Fast & Efficient)</option>
+                                        <option value="gpt-4">GPT-4 (Advanced & Premium)</option>
+                                        <option value="gpt-4-turbo">GPT-4 Turbo (Best Balance)</option>
+                                    </select>
+                                    <div class="form-text">AI model used for content generation. More advanced models provide better quality but cost more credits.</div>
+                                </div>
+                                
+                                <!-- Cost Estimation Section -->
+                                <div class="alert alert-warning mb-3">
+                                    <h6 class="mb-2"><i class="fas fa-coins me-2"></i>Estimated Cost</h6>
+                                    <div class="small">
+                                        <h6 class="mb-1">Script Generation (OpenAI):</h6>
+                                        <ul class="mb-2">
+                                            <li>GPT-3.5 Turbo: ~$0.10-0.30 per podcast</li>
+                                            <li>GPT-4: ~$0.50-1.50 per podcast</li>
+                                            <li>GPT-4 Turbo: ~$0.25-0.75 per podcast</li>
+                                        </ul>
+                                        
+                                        <h6 class="mb-1">Audio Generation (ElevenLabs):</h6>
+                                        <ul class="mb-0">
+                                            <li>Average 10-min podcast: ~$0.50-1.00</li>
+                                            <li>Based on character count & voice settings</li>
+                                            <li>Higher stability settings increase cost</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mt-2 text-dark">
+                                        <strong>Note:</strong> Costs are charged to your OpenAI and ElevenLabs accounts. Actual costs vary based on content length, model selection, and voice settings.
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="col-md-4">
                                 <div class="mb-3 text-center">
                                     <label class="form-label d-block">Cover Art</label>
-                                    <div class="bg-secondary text-white text-center p-5 mb-2 rounded">
+                                    <div id="cover-art-preview" class="bg-secondary text-white text-center p-5 mb-2 rounded">
                                         <i class="fas fa-image fa-3x"></i>
-                                        <p class="mt-2">Upload Cover Art</p>
+                                        <p class="mt-2" id="cover-art-text">Upload or Generate Cover Art</p>
                                     </div>
-                                    <input type="file" class="form-control" id="cover_art" name="cover_art" accept="image/*">
+                                    
+                                    <!-- Cover art options -->
+                                    <div class="d-flex gap-2 mb-2">
+                                        <button type="button" class="btn btn-outline-primary flex-grow-1" id="generate-cover-btn">
+                                            <i class="fas fa-magic me-1"></i> Generate with AI
+                                        </button>
+                                        <label for="cover_art" class="btn btn-outline-secondary flex-grow-1 mb-0">
+                                            <i class="fas fa-upload me-1"></i> Upload
+                                        </label>
+                                    </div>
+                                    
+                                    <input type="file" class="form-control d-none" id="cover_art" name="cover_art" accept="image/*">
+                                    <input type="hidden" id="generated_cover_path" name="generated_cover_path">
                                     <div class="form-text">Recommended: 1400×1400 pixels, JPG or PNG</div>
+                                    
+                                    <!-- Cover generation progress -->
+                                    <div id="cover-generation-progress" class="mt-2 d-none">
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                                        </div>
+                                        <small class="text-muted">Generating cover art with DALL-E...</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -98,6 +158,223 @@
                                     <li>Adopt a specific persona (e.g., "You are a cybersecurity expert with 20 years of experience")</li>
                                     <li>Use specific transitions or catchphrases</li>
                                 </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="blocked_terms" class="form-label">Blocked Words & Terms <span class="text-muted">(Optional)</span></label>
+                            <textarea class="form-control" id="blocked_terms" name="blocked_terms" rows="3" placeholder="Enter terms separated by commas (e.g., politics, violence, controversial topics)"></textarea>
+                            <div class="form-text">
+                                Words, phrases, or topics to exclude from your podcast. The system will filter out articles or content containing these terms.
+                                <ul class="mt-2">
+                                    <li>Enter multiple terms separated by commas</li>
+                                    <li>Case-insensitive matching will be applied</li>
+                                    <li>Can be used to block sensitive subjects or unwanted content</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- RSS Feed Sources -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-rss me-2"></i> RSS Feed Sources</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">Choose RSS feed categories for this podcast. You can add specific feeds later.</p>
+                                
+                                <!-- RSS Feed Categories -->
+                                <div class="mb-3">
+                                    <ul class="nav nav-tabs" id="feedCategoryTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="tech-tab" data-bs-toggle="tab" data-bs-target="#tech" type="button" role="tab">
+                                                <i class="fas fa-microchip me-1"></i> Technology
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab">
+                                                <i class="fas fa-chart-line me-1"></i> Business
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="science-tab" data-bs-toggle="tab" data-bs-target="#science" type="button" role="tab">
+                                                <i class="fas fa-flask me-1"></i> Science
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab">
+                                                <i class="fas fa-newspaper me-1"></i> News
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="entertainment-tab" data-bs-toggle="tab" data-bs-target="#entertainment" type="button" role="tab">
+                                                <i class="fas fa-gamepad me-1"></i> Entertainment
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="health-tab" data-bs-toggle="tab" data-bs-target="#health" type="button" role="tab">
+                                                <i class="fas fa-heartbeat me-1"></i> Health
+                                            </button>
+                                        </li>
+                                    </ul>
+                                    
+                                    <div class="tab-content mt-3" id="feedCategoryTabsContent">
+                                        <!-- Technology Tab -->
+                                        <div class="tab-pane fade show active" id="tech" role="tabpanel">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="card h-100 mb-3">
+                                                        <div class="card-header bg-dark bg-opacity-25">
+                                                            <h6 class="mb-0"><i class="fas fa-microchip me-2"></i>General Tech</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="hacker_news" id="feed_hacker_news" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_hacker_news">
+                                                                    Hacker News
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="tech_crunch" id="feed_tech_crunch" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_tech_crunch">
+                                                                    TechCrunch
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="the_verge" id="feed_the_verge" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_the_verge">
+                                                                    The Verge
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="wired" id="feed_wired" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_wired">
+                                                                    Wired
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card h-100 mb-3">
+                                                        <div class="card-header bg-dark bg-opacity-25">
+                                                            <h6 class="mb-0"><i class="fas fa-robot me-2"></i>AI & Development</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="openai_blog" id="feed_openai_blog" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_openai_blog">
+                                                                    OpenAI Blog
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="dev_to" id="feed_dev_to" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_dev_to">
+                                                                    DEV Community
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="github_blog" id="feed_github_blog" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_github_blog">
+                                                                    GitHub Blog
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="huggingface_blog" id="feed_huggingface_blog" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_huggingface_blog">
+                                                                    Hugging Face Blog
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Business Tab -->
+                                        <div class="tab-pane fade" id="business" role="tabpanel">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="card h-100 mb-3">
+                                                        <div class="card-header bg-dark bg-opacity-25">
+                                                            <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Business News</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="forbes" id="feed_forbes" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_forbes">
+                                                                    Forbes
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="bloomberg" id="feed_bloomberg" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_bloomberg">
+                                                                    Bloomberg
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="wsj" id="feed_wsj" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_wsj">
+                                                                    Wall Street Journal
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card h-100 mb-3">
+                                                        <div class="card-header bg-dark bg-opacity-25">
+                                                            <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Startups & Ventures</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="vc" id="feed_vc" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_vc">
+                                                                    Venture Capital
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="saastr" id="feed_saastr" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_saastr">
+                                                                    SaaStr
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feed-checkbox" type="checkbox" value="product_hunt" id="feed_product_hunt" name="feed_sources[]">
+                                                                <label class="form-check-label" for="feed_product_hunt">
+                                                                    Product Hunt
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Other tab content (Science, News, Entertainment, Health) would go here -->
+                                        <div class="tab-pane fade" id="science" role="tabpanel">
+                                            <!-- Science content -->
+                                        </div>
+                                        
+                                        <div class="tab-pane fade" id="news" role="tabpanel">
+                                            <!-- News content -->
+                                        </div>
+                                        
+                                        <div class="tab-pane fade" id="entertainment" role="tabpanel">
+                                            <!-- Entertainment content -->
+                                        </div>
+                                        
+                                        <div class="tab-pane fade" id="health" role="tabpanel">
+                                            <!-- Health content -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-feeds">
+                                        <i class="fas fa-times me-1"></i> Clear All
+                                    </button>
+                                    <small class="text-muted">You can manage more detailed feeds after creating the podcast</small>
+                                </div>
                             </div>
                         </div>
                         
@@ -200,6 +477,118 @@
                 this.classList.remove('btn-success');
                 this.classList.add('btn-outline-primary');
             }, 1500);
+        });
+    });
+    
+    // Handle file input change to show preview
+    document.getElementById('cover_art').addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                // Reset generated cover path if user uploads a file
+                document.getElementById('generated_cover_path').value = '';
+                
+                // Show preview
+                const previewDiv = document.getElementById('cover-art-preview');
+                previewDiv.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="max-height: 200px;">`;
+                document.getElementById('cover-art-text').textContent = 'Cover Art Preview';
+            }
+            
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+    
+    // Handle generate cover art button
+    document.getElementById('generate-cover-btn').addEventListener('click', function() {
+        const title = document.getElementById('podcast_title').value || 'My Podcast';
+        const description = document.getElementById('podcast_description').value || '';
+        
+        // Show generation progress
+        document.getElementById('cover-generation-progress').classList.remove('d-none');
+        this.disabled = true;
+        
+        // Call the API to generate cover art
+        fetch('/generate_cover_art', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                podcast_title: title,
+                podcast_description: description,
+                category: 'Technology'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide progress indicator
+            document.getElementById('cover-generation-progress').classList.add('d-none');
+            this.disabled = false;
+            
+            if (data.success) {
+                // Show the generated image
+                const previewDiv = document.getElementById('cover-art-preview');
+                previewDiv.innerHTML = `<img src="${data.image_url}" class="img-fluid rounded" style="max-height: 200px;">`;
+                
+                // Store the path in the hidden input - this is the critical part for saving to DB
+                document.getElementById('generated_cover_path').value = data.file_path;
+                console.log("Cover art path set in new podcast:", data.file_path);
+                
+                // Update the text if the element exists
+                const textElement = document.getElementById('cover-art-text');
+                if (textElement) {
+                    textElement.textContent = 'AI-Generated Cover Art';
+                }
+                
+                // Show success indicator on the button
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-success');
+                setTimeout(() => {
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-primary');
+                }, 2000);
+            } else {
+                // Show error
+                alert('Error generating cover art: ' + (data.error || 'Unknown error'));
+                
+                // Reset the preview
+                const previewDiv = document.getElementById('cover-art-preview');
+                previewDiv.innerHTML = `
+                    <i class="fas fa-image fa-3x"></i>
+                    <p class="mt-2" id="cover-art-text">Upload or Generate Cover Art</p>
+                `;
+                
+                // Show error indicator on the button
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-danger');
+                setTimeout(() => {
+                    this.classList.remove('btn-danger');
+                    this.classList.add('btn-outline-primary');
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('cover-generation-progress').classList.add('d-none');
+            this.disabled = false;
+            alert('Error generating cover art: ' + error.message);
+        });
+    });
+    
+    // Handle RSS feed checkboxes
+    document.getElementById('clear-all-feeds').addEventListener('click', function() {
+        document.querySelectorAll('.feed-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    });
+    
+    // Select all feeds in the active tab
+    document.querySelectorAll('#feedCategoryTabs .nav-link').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // This will run when a tab is clicked
+            const tabId = this.getAttribute('data-bs-target').substring(1);
+            const activeTabPane = document.getElementById(tabId);
         });
     });
 </script>

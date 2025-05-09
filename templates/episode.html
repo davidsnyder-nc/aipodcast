@@ -36,6 +36,24 @@
         </a>
     </div>
 
+    {% if episode.status == 'script_generated' %}
+    <div class="col-12 mt-3">
+        <div class="alert alert-warning">
+            <h5 class="mb-2"><i class="fas fa-coins me-2"></i>Audio Generation Cost Estimate</h5>
+            <p>Generating audio for this podcast will use your ElevenLabs API credits:</p>
+            <ul class="mb-1">
+                <li><strong>Estimated cost:</strong> ~${{ (episode.script|length / 1000 * 0.03)|round(2) }} - ${{ (episode.script|length / 1000 * 0.06)|round(2) }}</li>
+                <li><strong>Character count:</strong> {{ episode.script|length }} characters</li>
+                <li><strong>Rate:</strong> ~$0.03-0.06 per 1,000 characters (varies by voice settings)</li>
+            </ul>
+            <p class="small mb-0 mt-2 text-dark">
+                <i class="fas fa-info-circle me-1"></i> Higher stability and similarity settings will increase cost. Make sure you have enough 
+                <a href="{{ url_for('voices') }}" class="alert-link">ElevenLabs credits</a> before proceeding.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Progress Bar Modal for Audio Generation -->
     <div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
@@ -68,6 +86,12 @@
                     Your browser does not support the audio element.
                 </audio>
                 
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAudioModal">
+                        <i class="fas fa-trash me-1"></i> Delete Audio
+                    </button>
+                </div>
+                
                 {% if episode.publish_url %}
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle me-1"></i> Published to GitHub Pages
@@ -76,6 +100,26 @@
                     </a>
                 </div>
                 {% endif %}
+                
+                <!-- Delete Audio Confirmation Modal -->
+                <div class="modal fade" id="deleteAudioModal" tabindex="-1" aria-labelledby="deleteAudioModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteAudioModalLabel">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete the audio file for this episode?</p>
+                                <p class="text-danger"><strong>Warning:</strong> This action cannot be undone. You will need to regenerate the audio if you want it back.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <a href="{{ url_for('delete_audio', id=episode.id) }}" class="btn btn-danger">Delete Audio</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
