@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:ns0="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+  <channel>
+    <title>Daily Tech Insights</title>
+    <description>An AI-generated daily tech news podcast covering the latest in technology and startups.</description>
+    <link>https://example.com</link>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 09 May 2025 04:47:39 GMT</lastBuildDate>
+    <ns0:author>AI Podcast Generator</ns0:author>
+    <ns0:summary>An AI-generated daily tech news podcast covering the latest in technology and startups.</ns0:summary>
+    <item>
+      <title>Tech Insights - 2025-05-09</title>
+      <description>Welcome back to another exciting episode of Tech Insights! Today, May 09, 2025, we dive into the ever-evolving world of technology to bring you the hottest news and trends. Join us as we unravel the m...</description>
+      <pubDate>Fri, 09 May 2025 04:38:28 GMT</pubDate>
+      <guid isPermaLink="false">https://davidsnyder-nc.github.io/aipodcast/podcasts/20250509_tech_insights_-_2025-05-09.mp3</guid>
+      <enclosure url="https://davidsnyder-nc.github.io/aipodcast/podcasts/20250509_tech_insights_-_2025-05-09.mp3" length="6523107" type="audio/mpeg" />
+      <itunes:duration>00:10:00</itunes:duration>
+      <itunes:summary>Welcome back to another exciting episode of Tech Insights! Today, May 09, 2025, we dive into the ever-evolving world of technology to bring you the hottest news and trends. Join us as we unravel the m...</itunes:summary>
+    </item>
+  </channel>
+</rss>
