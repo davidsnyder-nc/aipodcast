@@ -31,12 +31,15 @@ class Settings(db.Model):
     podcast_title = db.Column(db.String(255), nullable=False, default="Daily Tech Insights")
     podcast_description = db.Column(db.Text, nullable=False, default="An AI-generated daily tech news podcast covering the latest in technology and startups.")
     podcast_author = db.Column(db.String(255), nullable=False, default="AI Podcast Generator")
+    host_name = db.Column(db.String(255), nullable=True)  # Host name for the podcast script
     podcast_language = db.Column(db.String(10), nullable=False, default="en-us")
     podcast_category = db.Column(db.String(100), nullable=False, default="Technology")
     podcast_explicit = db.Column(db.Boolean, default=False)
     time_frame = db.Column(db.String(20), nullable=False, default="today")  # Options: today, week, month
     ai_instructions = db.Column(db.Text, nullable=True, default=None)  # Custom instructions for the AI
     podcast_duration = db.Column(db.Integer, nullable=False, default=10)  # Target duration in minutes
+    openai_model = db.Column(db.String(50), nullable=False, default="gpt-3.5-turbo")  # AI model to use for generation
+    blocked_terms = db.Column(db.Text, nullable=True)  # List of blocked words/terms for content filtering
     cover_art_path = db.Column(db.String(255), nullable=True)
     voice_id = db.Column(db.String(255), nullable=True)  # Podcast-specific voice ID
     voice_stability = db.Column(db.Float, default=0.5)  # Voice stability setting
@@ -76,6 +79,7 @@ class RssFeed(db.Model):
     active = db.Column(db.Boolean, default=True)
     last_fetched = db.Column(db.DateTime, nullable=True)
     podcast_id = db.Column(db.Integer, db.ForeignKey('settings.id'), nullable=True)  # Associate with specific podcast
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Associate with user
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
