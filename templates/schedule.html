@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Schedule Settings - AI Podcasts Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-9">
+            <h1 class="mb-4">Podcast Schedule Settings</h1>
+            <p class="lead">Configure automatic podcast generation settings</p>
+        </div>
+        <div class="col-md-3 text-end">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Schedule Settings</h4>
+                </div>
+                <div class="card-body">
+                    
+                    {% if podcasts %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Podcast</th>
+                                <th>Auto Generate</th>
+                                <th>Schedule</th>
+                                <th>Auto Publish</th>
+                                <th>Last Generated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for podcast in podcasts %}
+                            <tr>
+                                <td>{{ podcast.podcast_title }}</td>
+                                <td>
+                                    {% if podcast.auto_generate %}
+                                    <span class="badge bg-success">Enabled</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Disabled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if podcast.schedule_type == 'daily' %}
+                                        Daily at {{ '{:02d}:{:02d}'.format(podcast.schedule_hour, podcast.schedule_minute) }}
+                                    {% elif podcast.schedule_type == 'weekly' %}
+                                        Weekly on 
+                                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                        {{ days[podcast.schedule_day] }} at {{ '{:02d}:{:02d}'.format(podcast.schedule_hour, podcast.schedule_minute) }}
+                                    {% else %}
+                                        {{ podcast.schedule_type|capitalize }} at {{ '{:02d}:{:02d}'.format(podcast.schedule_hour, podcast.schedule_minute) }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if podcast.auto_publish %}
+                                    <span class="badge bg-success">Enabled</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Disabled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if podcast.last_auto_generated %}
+                                    {{ podcast.last_auto_generated.strftime('%Y-%m-%d %H:%M') }}
+                                    {% else %}
+                                    Never
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('edit_schedule', id=podcast.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <p>You don't have any podcasts yet. Please create a podcast first.</p>
+                        <a href="{{ url_for('new_podcast') }}" class="btn btn-primary mt-2">Create New Podcast</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">How Auto-Generation Works</h4>
+                </div>
+                <div class="card-body">
+                    <p>When auto-generation is enabled for a podcast:</p>
+                    <ol>
+                        <li>The system will automatically generate a new podcast episode at the scheduled time.</li>
+                        <li>It will fetch the latest articles from your active RSS feeds according to the podcast's time frame setting.</li>
+                        <li>The system will generate a podcast script using OpenAI based on the fetched articles and your podcast settings.</li>
+                        <li>If audio generation is enabled, it will convert the script to audio using ElevenLabs TTS.</li>
+                        <li>If auto-publish is enabled, it will automatically publish the podcast to GitHub Pages.</li>
+                    </ol>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> The scheduler runs every 5 minutes to check if any podcasts are due to be generated.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

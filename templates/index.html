@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Podcast Creator{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-4">AI Podcast Creator</h1>
+        <p class="lead">Generate, manage, and publish AI-powered podcasts with ease.</p>
+    </div>
+    <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+        {% if current_user.is_authenticated %}
+        <div class="btn-group">
+            <a href="{{ url_for('generate_podcast') }}" class="btn btn-primary">
+                <i class="fas fa-microphone-alt me-1"></i> Create New Episode
+            </a>
+            <a href="{{ url_for('new_podcast') }}" class="btn btn-outline-primary">
+                <i class="fas fa-plus-circle me-1"></i> New Podcast
+            </a>
+        </div>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt me-1"></i> Login to Generate Podcasts
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if current_user.is_authenticated and podcasts %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Your Podcasts</h5>
+                <a href="{{ url_for('settings') }}" class="btn btn-sm btn-outline-primary">Manage All</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for podcast in podcasts %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            {% if podcast.cover_art_path %}
+                            <div class="text-center mt-3">
+                                <img src="{{ url_for('static', filename=podcast.cover_art_path) }}" class="rounded" alt="{{ podcast.podcast_title }}" style="width: 100px; height: 100px; object-fit: cover;">
+                            </div>
+                            {% else %}
+                            <div class="text-center mt-3">
+                                <div class="bg-secondary text-white rounded d-inline-flex justify-content-center align-items-center" style="width: 100px; height: 100px;">
+                                    <div>
+                                        <i class="fas fa-podcast fa-2x mb-1"></i>
+                                        <p class="small mb-0">No Cover</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ podcast.podcast_title }}</h5>
+                                <p class="card-text small text-truncate">{{ podcast.podcast_description }}</p>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('edit_podcast', id=podcast.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </a>
+                                    <a href="{{ url_for('generate_podcast') }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-microphone-alt me-1"></i> Create Episode
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+{% if not current_user.is_authenticated %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info bg-opacity-25">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Welcome to AI Podcast Creator</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Generate, manage, and publish AI-powered podcasts with ease. Here's how to get started:</p>
+                <ol class="mb-0">
+                    <li>Create an account or log in to access all features</li>
+                    <li>Configure your API keys (OpenAI, ElevenLabs, GitHub)</li>
+                    <li>Add RSS feeds for content sources</li>
+                    <li>Set up your podcast properties and voice settings</li>
+                    <li>Generate and publish podcasts automatically or manually</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Episodes</h5>
+                <span class="badge bg-primary">{{ episodes|length }} Episodes</span>
+            </div>
+            <div class="card-body">
+                {% if episodes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for episode in episodes %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('episode', id=episode.id) }}">{{ episode.title }}</a>
+                                    </td>
+                                    <td>{{ episode.date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if episode.status == 'draft' %}
+                                            <span class="badge bg-secondary">Draft</span>
+                                        {% elif episode.status == 'script_generated' %}
+                                            <span class="badge bg-info">Script Ready</span>
+                                        {% elif episode.status == 'audio_generated' %}
+                                            <span class="badge bg-warning">Audio Ready</span>
+                                        {% elif episode.status == 'published' %}
+                                            <span class="badge bg-success">Published</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ url_for('episode', id=episode.id) }}" class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if episode.status == 'script_generated' %}
+                                                <a href="{{ url_for('generate_audio', id=episode.id) }}" class="btn btn-outline-warning">
+                                                    <i class="fas fa-volume-up"></i> Generate Audio
+                                                </a>
+                                            {% endif %}
+                                            {% if episode.status == 'audio_generated' %}
+                                                <a href="{{ url_for('publish', id=episode.id) }}" class="btn btn-outline-success">
+                                                    <i class="fas fa-upload"></i> Publish
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> No episodes found. 
+                        <a href="{{ url_for('generate_podcast') }}" class="alert-link">Create your first episode</a> or 
+                        <a href="{{ url_for('new_podcast') }}" class="alert-link">set up a new podcast</a> first!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

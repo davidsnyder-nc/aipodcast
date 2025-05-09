@@ -1,0 +1,140 @@
+/* Custom styles for AI Podcasts Dashboard */
+
+/* Global styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Card styling */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Script content styling */
+.script-content {
+    max-height: 600px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+    border-radius: 0.25rem;
+    padding: 1rem;
+}
+
+/* Audio player styling */
+audio {
+    width: 100%;
+    border-radius: 0.25rem;
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Table styling for episodes */
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+/* Utility classes */
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Status indicators */
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.status-indicator-success {
+    background-color: var(--bs-success);
+}
+
+.status-indicator-warning {
+    background-color: var(--bs-warning);
+}
+
+.status-indicator-danger {
+    background-color: var(--bs-danger);
+}
+
+.status-indicator-info {
+    background-color: var(--bs-info);
+}
+
+/* Button enhancements */
+.btn {
+    font-weight: 500;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Form focus styles */
+.form-control:focus, .form-select:focus {
+    border-color: rgba(var(--bs-primary-rgb), 0.5);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Card header styling */
+.card-header {
+    font-weight: 500;
+}
+
+/* Alert enhancements */
+.alert {
+    border-width: 0 0 0 4px;
+}
+
+/* Link styling */
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-responsive {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+}
+
+/* Storage directory */
+.storage-directory {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: rgba(var(--bs-light-rgb), 0.1);
+    border-radius: 0.25rem;
+    font-family: monospace;
+}

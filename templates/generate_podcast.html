@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Podcast - AI Podcast Creator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-microphone-alt me-2"></i>Create New Episode</h4>
+                        <a href="{{ url_for('new_podcast') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus-circle me-1"></i> Create New Podcast
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if podcasts %}
+                        <p class="mb-4">Select the podcast you want to generate content for:</p>
+                        
+                        <form method="POST" action="{{ url_for('generate_podcast') }}">
+                            <div class="row">
+                                {% for podcast in podcasts %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100 podcast-select-card">
+                                        <input type="radio" name="podcast_id" value="{{ podcast.id }}" id="podcast_{{ podcast.id }}" class="visually-hidden podcast-select-input" required>
+                                        <label for="podcast_{{ podcast.id }}" class="podcast-select-label h-100">
+                                            <div class="card-body text-center">
+                                                {% if podcast.cover_art_path %}
+                                                <img src="{{ url_for('static', filename=podcast.cover_art_path) }}" class="mb-3 img-fluid rounded" style="max-height: 120px;" alt="{{ podcast.podcast_title }}">
+                                                {% else %}
+                                                <div class="bg-secondary text-white rounded p-3 mb-3">
+                                                    <i class="fas fa-podcast fa-3x mb-2"></i>
+                                                    <p class="mb-0">No Cover Art</p>
+                                                </div>
+                                                {% endif %}
+                                                <h5 class="card-title">{{ podcast.podcast_title }}</h5>
+                                                <p class="card-text small text-truncate">{{ podcast.podcast_description }}</p>
+                                                <div class="selected-indicator">
+                                                    <i class="fas fa-check-circle fa-2x"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <h5><i class="fas fa-info-circle me-2"></i>How it works</h5>
+                                <p class="mb-0">
+                                    When you click generate, the system will:
+                                </p>
+                                <ol class="mb-0 ms-3 mt-2">
+                                    <li>Fetch the latest articles from your active RSS feeds</li>
+                                    <li>Use OpenAI to generate a podcast script</li>
+                                    <li>Create a new episode that you can later convert to audio</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-microphone-alt me-2"></i> Generate New Episode Content
+                                </button>
+                                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Back to Home</a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <p>You don't have any podcasts yet. Please create a podcast first.</p>
+                            <a href="{{ url_for('new_podcast') }}" class="btn btn-primary mt-2">Create New Podcast</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .podcast-select-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .podcast-select-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .podcast-select-input:checked + .podcast-select-label .podcast-select-card {
+        border-color: var(--bs-primary);
+    }
+    
+    .selected-indicator {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: var(--bs-primary);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    
+    .podcast-select-input:checked + .podcast-select-label .selected-indicator {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // JavaScript to enhance the podcast selection UI
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.podcast-select-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                const input = this.querySelector('input[type="radio"]');
+                input.checked = true;
+                
+                // Remove selected class from all cards
+                cards.forEach(c => c.classList.remove('border-primary'));
+                
+                // Add selected class to clicked card
+                this.classList.add('border-primary');
+            });
+        });
+    });
+</script>
+{% endblock %}

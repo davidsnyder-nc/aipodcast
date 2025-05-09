@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Schedule - {{ podcast.podcast_title }} - AI Podcasts Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-9">
+            <h1 class="mb-4">Edit Schedule Settings</h1>
+            <p class="lead">{{ podcast.podcast_title }}</p>
+        </div>
+        <div class="col-md-3 text-end">
+            <a href="{{ url_for('settings', _anchor='nav-schedule') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Schedule
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Schedule Settings</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('update_schedule', id=podcast.id) }}">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="auto_generate" name="auto_generate" {% if podcast.auto_generate %}checked{% endif %}>
+                                <label class="form-check-label" for="auto_generate">Enable automatic podcast generation</label>
+                            </div>
+                            <div class="form-text text-muted">When enabled, the system will automatically generate new podcast episodes according to the schedule.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Schedule Type</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="schedule_type" id="schedule_daily" value="daily" {% if podcast.schedule_type == 'daily' %}checked{% endif %}>
+                                <label class="form-check-label" for="schedule_daily">
+                                    Daily
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="schedule_type" id="schedule_weekly" value="weekly" {% if podcast.schedule_type == 'weekly' %}checked{% endif %}>
+                                <label class="form-check-label" for="schedule_weekly">
+                                    Weekly
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="weekday_selector" {% if podcast.schedule_type != 'weekly' %}style="display: none;"{% endif %}>
+                            <label class="form-label">Day of Week</label>
+                            <select class="form-select" name="schedule_day">
+                                <option value="0" {% if podcast.schedule_day == 0 %}selected{% endif %}>Monday</option>
+                                <option value="1" {% if podcast.schedule_day == 1 %}selected{% endif %}>Tuesday</option>
+                                <option value="2" {% if podcast.schedule_day == 2 %}selected{% endif %}>Wednesday</option>
+                                <option value="3" {% if podcast.schedule_day == 3 %}selected{% endif %}>Thursday</option>
+                                <option value="4" {% if podcast.schedule_day == 4 %}selected{% endif %}>Friday</option>
+                                <option value="5" {% if podcast.schedule_day == 5 %}selected{% endif %}>Saturday</option>
+                                <option value="6" {% if podcast.schedule_day == 6 %}selected{% endif %}>Sunday</option>
+                            </select>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Time</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <select class="form-select" name="schedule_hour">
+                                            {% for hour in range(24) %}
+                                            <option value="{{ hour }}" {% if podcast.schedule_hour == hour %}selected{% endif %}>{{ '{:02d}'.format(hour) }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select" name="schedule_minute">
+                                            {% for minute in [0, 15, 30, 45] %}
+                                            <option value="{{ minute }}" {% if podcast.schedule_minute == minute %}selected{% endif %}>{{ '{:02d}'.format(minute) }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-text text-muted">24-hour format (00:00 - 23:45)</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="auto_publish" name="auto_publish" {% if podcast.auto_publish %}checked{% endif %}>
+                                <label class="form-check-label" for="auto_publish">Auto-publish to GitHub Pages</label>
+                            </div>
+                            <div class="form-text text-muted">When enabled, the system will automatically publish new podcast episodes to GitHub Pages.</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Save Schedule Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Advanced Settings</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('run_scheduler_now', id=podcast.id) }}">
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-play me-1"></i> Generate Podcast Now
+                            </button>
+                        </div>
+                        <div class="form-text text-muted mt-2">This will immediately generate a new podcast episode using the current settings, regardless of the schedule.</div>
+                    </form>
+                    
+                    {% if podcast.last_auto_generated %}
+                    <hr>
+                    <p>Last automatic generation: <strong>{{ podcast.last_auto_generated.strftime('%Y-%m-%d %H:%M') }}</strong></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const scheduleDaily = document.getElementById('schedule_daily');
+        const scheduleWeekly = document.getElementById('schedule_weekly');
+        const weekdaySelector = document.getElementById('weekday_selector');
+        
+        function toggleWeekdaySelector() {
+            if (scheduleWeekly.checked) {
+                weekdaySelector.style.display = 'block';
+            } else {
+                weekdaySelector.style.display = 'none';
+            }
+        }
+        
+        scheduleDaily.addEventListener('change', toggleWeekdaySelector);
+        scheduleWeekly.addEventListener('change', toggleWeekdaySelector);
+    });
+</script>
+{% endblock %}

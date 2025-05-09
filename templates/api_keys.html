@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}API Keys | AI Podcasts Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-4">API Keys</h1>
+        <p class="lead">Configure API keys for external services used by the podcast generator.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Service API Keys</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('update_api_keys') }}" method="POST">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-robot me-2"></i>OpenAI</h6>
+                            <div class="mb-3">
+                                <label for="openai_api_key" class="form-label">OpenAI API Key</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="openai_api_key" name="openai_api_key" 
+                                           placeholder="Enter your OpenAI API key"
+                                           value="{{ openai_key }}"
+                                           autocomplete="off">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="openai_api_key">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    Used for generating podcast scripts. Get your API key from 
+                                    <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI's website</a>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2 mb-3"><i class="fas fa-volume-up me-2"></i>ElevenLabs</h6>
+                            <div class="mb-3">
+                                <label for="elevenlabs_api_key" class="form-label">ElevenLabs API Key</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="elevenlabs_api_key" name="elevenlabs_api_key" 
+                                           placeholder="Enter your ElevenLabs API key"
+                                           value="{{ elevenlabs_key }}"
+                                           autocomplete="off">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="elevenlabs_api_key">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    Used for text-to-speech conversion. Get your API key from 
+                                    <a href="https://elevenlabs.io/" target="_blank">ElevenLabs' website</a>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2 mb-3"><i class="fab fa-github me-2"></i>GitHub</h6>
+                            <div class="mb-3">
+                                <label for="github_token" class="form-label">GitHub Personal Access Token</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="github_token" name="github_token" 
+                                           placeholder="Enter your GitHub personal access token"
+                                           value="{{ github_token }}"
+                                           autocomplete="off">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="github_token">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    Used for publishing podcasts to GitHub Pages. Create a token with 'repo' scope from 
+                                    <a href="https://github.com/settings/tokens" target="_blank">GitHub's token settings</a>.
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="github_username" class="form-label">GitHub Username</label>
+                                    <input type="text" class="form-control" id="github_username" name="github_username" 
+                                           placeholder="Enter your GitHub username"
+                                           value="{{ github_username }}">
+                                    <div class="form-text">Your GitHub username.</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="github_repo" class="form-label">GitHub Repository</label>
+                                    <input type="text" class="form-control" id="github_repo" name="github_repo" 
+                                           placeholder="Enter your GitHub repository name"
+                                           value="{{ github_repo }}">
+                                    <div class="form-text">The repository name for publishing podcasts (should be set up for GitHub Pages).</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save API Keys
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5 class="alert-heading"><i class="fas fa-shield-alt me-2"></i>Security Information</h5>
+            <p>API keys can be entered directly in the form above and will be securely stored in the database.</p>
+            <p>Alternatively, you can set the following environment variables which will be checked first:</p>
+            <ul class="mb-0">
+                <li><code>OPENAI_API_KEY</code> - OpenAI API key {% if not openai_key %}<span class="text-danger">(not set)</span>{% endif %}</li>
+                <li><code>ELEVENLABS_API_KEY</code> - ElevenLabs API key {% if not elevenlabs_key %}<span class="text-danger">(not set)</span>{% endif %}</li>
+                <li><code>GITHUB_TOKEN</code> - GitHub personal access token {% if not github_token %}<span class="text-danger">(not set)</span>{% endif %}</li>
+                <li><code>GITHUB_USERNAME</code> - GitHub username {% if not github_username %}<span class="text-danger">(not set)</span>{% endif %}</li>
+                <li><code>GITHUB_REPO</code> - GitHub repository name {% if not github_repo %}<span class="text-danger">(not set)</span>{% endif %}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                this.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+    });
+</script>
+{% endblock %}

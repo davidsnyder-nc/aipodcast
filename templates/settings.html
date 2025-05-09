@@ -1,0 +1,589 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - AI Podcast Creator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav>
+        <div class="nav nav-tabs mb-4" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="nav-podcasts-tab" data-bs-toggle="tab" data-bs-target="#nav-podcasts" type="button" role="tab" aria-controls="nav-podcasts" aria-selected="true">
+                <i class="fas fa-podcast me-1"></i> My Podcasts
+            </button>
+            <button class="nav-link" id="nav-api-keys-tab" data-bs-toggle="tab" data-bs-target="#nav-api-keys" type="button" role="tab" aria-controls="nav-api-keys" aria-selected="false">
+                <i class="fas fa-key me-1"></i> API Keys
+            </button>
+            <button class="nav-link" id="nav-voices-tab" data-bs-toggle="tab" data-bs-target="#nav-voices" type="button" role="tab" aria-controls="nav-voices" aria-selected="false">
+                <i class="fas fa-microphone me-1"></i> Voices
+            </button>
+            <button class="nav-link" id="nav-schedule-tab" data-bs-toggle="tab" data-bs-target="#nav-schedule" type="button" role="tab" aria-controls="nav-schedule" aria-selected="false">
+                <i class="fas fa-calendar-alt me-1"></i> Schedule
+            </button>
+            <button class="nav-link" id="nav-status-tab" data-bs-toggle="tab" data-bs-target="#nav-status" type="button" role="tab" aria-controls="nav-status" aria-selected="false">
+                <i class="fas fa-server me-1"></i> System Status
+            </button>
+            <button class="nav-link" id="nav-quickstart-tab" data-bs-toggle="tab" data-bs-target="#nav-quickstart" type="button" role="tab" aria-controls="nav-quickstart" aria-selected="false">
+                <i class="fas fa-rocket me-1"></i> Quick Start
+            </button>
+            <button class="nav-link" id="nav-help-tab" data-bs-toggle="tab" data-bs-target="#nav-help" type="button" role="tab" aria-controls="nav-help" aria-selected="false">
+                <i class="fas fa-question-circle me-1"></i> Help
+            </button>
+        </div>
+    </nav>
+    
+    <div class="tab-content" id="nav-tabContent">
+        <!-- Podcasts Tab -->
+        <div class="tab-pane fade show active" id="nav-podcasts" role="tabpanel" aria-labelledby="nav-podcasts-tab">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Your Podcasts</h2>
+                <a href="{{ url_for('new_podcast') }}" class="btn btn-primary">Create New Podcast</a>
+            </div>
+            
+            {% if podcasts %}
+                <div class="row">
+                    {% for podcast in podcasts %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                {% if podcast.cover_art_path %}
+                                    <div class="text-center mt-3">
+                                        <img src="{{ url_for('static', filename=podcast.cover_art_path) }}" class="rounded" alt="{{ podcast.podcast_title }}" style="width: 100px; height: 100px; object-fit: cover;">
+                                    </div>
+                                {% else %}
+                                    <div class="text-center mt-3">
+                                        <div class="bg-secondary text-white rounded d-inline-flex justify-content-center align-items-center" style="width: 100px; height: 100px;">
+                                            <div>
+                                                <i class="fas fa-podcast fa-2x mb-1"></i>
+                                                <p class="small mb-0">No Cover</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ podcast.podcast_title }}</h5>
+                                    <p class="card-text text-truncate">{{ podcast.podcast_description }}</p>
+                                    <p class="card-text small">
+                                        <strong>Author:</strong> {{ podcast.podcast_author }}<br>
+                                        <strong>Language:</strong> {{ podcast.podcast_language }}<br>
+                                        <strong>Category:</strong> {{ podcast.podcast_category }}
+                                    </p>
+                                    {% if podcast.rss_slug %}
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('podcast_rss', slug=podcast.rss_slug) }}" target="_blank" class="btn btn-sm btn-outline-info w-100">
+                                            <i class="fas fa-rss me-1"></i> RSS Feed
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer d-flex justify-content-between">
+                                    <a href="{{ url_for('edit_podcast', id=podcast.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="{{ url_for('delete_podcast', id=podcast.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this podcast?')">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p>You don't have any podcasts yet. Click the "Create New Podcast" button to get started.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- API Keys Tab -->
+        <div class="tab-pane fade" id="nav-api-keys" role="tabpanel" aria-labelledby="nav-api-keys-tab">
+            <h2 class="mb-4">API Keys</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Configure API Keys</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('update_api_keys') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="openai_api_key" class="form-label">OpenAI API Key</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="openai_api_key" name="openai_api_key" value="{{ openai_key }}" placeholder="sk-...">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="openai_api_key">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Used for generating podcast scripts with GPT.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="elevenlabs_api_key" class="form-label">ElevenLabs API Key</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="elevenlabs_api_key" name="elevenlabs_api_key" value="{{ elevenlabs_key }}" placeholder="...">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="elevenlabs_api_key">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Used for text-to-speech conversion.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="github_token" class="form-label">GitHub Personal Access Token</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="github_token" name="github_token" value="{{ github_token }}" placeholder="ghp_...">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="github_token">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Required for publishing podcasts to GitHub Pages.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="github_username" class="form-label">GitHub Username</label>
+                            <input type="text" class="form-control" id="github_username" name="github_username" value="{{ github_username }}">
+                            <div class="form-text">Your GitHub username.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="github_repo" class="form-label">GitHub Repository Name</label>
+                            <input type="text" class="form-control" id="github_repo" name="github_repo" value="{{ github_repo }}">
+                            <div class="form-text">Repository name for hosting podcasts (will be created if it doesn't exist).</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save API Keys</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4>GitHub Configuration Instructions</h4>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Create a GitHub repository (or use an existing one).</li>
+                        <li>Generate a <a href="https://github.com/settings/tokens" target="_blank">Personal Access Token</a> with <code>repo</code> scope.</li>
+                        <li>Enter your token, username, and repository name in the form above.</li>
+                        <li>The system will automatically configure GitHub Pages for hosting your podcasts.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voices Tab -->
+        <div class="tab-pane fade" id="nav-voices" role="tabpanel" aria-labelledby="nav-voices-tab">
+            <h2 class="mb-4">Voice Settings</h2>
+            
+            <div class="alert alert-info">
+                <p><i class="fas fa-info-circle"></i> Voice settings are now configured per podcast. Please edit each podcast to set its specific voice.</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4>Default Voice Configuration</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('update_voice') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="voice_id" class="form-label">ElevenLabs Voice</label>
+                            <select class="form-select" id="voice_id" name="voice_id">
+                                <option value="">Select a voice...</option>
+                                {% for voice in available_voices %}
+                                <option value="{{ voice.voice_id }}" {% if default_voice and default_voice.voice_id == voice.voice_id %}selected{% endif %}>
+                                    {{ voice.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">This is the default voice used for new podcasts.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="stability" class="form-label">Stability: <span id="stability_value">{{ default_voice.stability if default_voice else 0.5 }}</span></label>
+                            <input type="range" class="form-range" id="stability" name="stability" min="0" max="1" step="0.01" value="{{ default_voice.stability if default_voice else 0.5 }}">
+                            <div class="form-text">Lower values allow for more creativity; higher values make the voice more stable and consistent.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="similarity_boost" class="form-label">Similarity Boost: <span id="similarity_boost_value">{{ default_voice.similarity_boost if default_voice else 0.5 }}</span></label>
+                            <input type="range" class="form-range" id="similarity_boost" name="similarity_boost" min="0" max="1" step="0.01" value="{{ default_voice.similarity_boost if default_voice else 0.5 }}">
+                            <div class="form-text">Higher values make the voice sound more like the original voice sample.</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Default Voice Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div class="tab-pane fade" id="nav-schedule" role="tabpanel" aria-labelledby="nav-schedule-tab">
+            <h2 class="mb-4">Scheduler Settings</h2>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4>Podcast Generation Schedule</h4>
+                </div>
+                <div class="card-body">
+                    {% if scheduled_podcasts %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Podcast</th>
+                                        <th>Schedule</th>
+                                        <th>Last Generated</th>
+                                        <th>Auto-Publish</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for podcast in scheduled_podcasts %}
+                                    <tr>
+                                        <td>{{ podcast.podcast_title }}</td>
+                                        <td>
+                                            {% if podcast.auto_generate %}
+                                                {% if podcast.schedule_type == 'daily' %}
+                                                    Daily at {{ podcast.schedule_hour }}:{{ '%02d' % podcast.schedule_minute }}
+                                                {% elif podcast.schedule_type == 'weekly' %}
+                                                    Weekly on 
+                                                    {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                                    {{ days[podcast.schedule_day] }} at {{ podcast.schedule_hour }}:{{ '%02d' % podcast.schedule_minute }}
+                                                {% elif podcast.schedule_type == 'custom' %}
+                                                    Custom schedule
+                                                {% endif %}
+                                            {% else %}
+                                                Not scheduled
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if podcast.last_auto_generated %}
+                                                {{ podcast.last_auto_generated.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                Never
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if podcast.auto_publish %}
+                                                <span class="badge bg-success">Yes</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">No</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('edit_schedule', id=podcast.id) }}" class="btn btn-sm btn-info">Edit</a>
+                                            <a href="{{ url_for('run_scheduler_now', id=podcast.id) }}" class="btn btn-sm btn-primary" onclick="return confirm('Generate a podcast now?')">Run Now</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>No podcasts have been configured for scheduled generation. Edit each podcast to set up scheduling.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Scheduler Status</h4>
+                </div>
+                <div class="card-body">
+                    <p>The scheduler process runs in the background to automatically generate podcasts according to your schedule.</p>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="badge {% if scheduler_running %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if scheduler_running %}
+                                    Running
+                                {% else %}
+                                    Not Running
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            {% if scheduler_running %}
+                                <a href="{{ url_for('stop_scheduler') }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to stop the scheduler? Scheduled podcasts will not be generated automatically until you restart it.')">Stop Scheduler</a>
+                            {% else %}
+                                <a href="{{ url_for('start_scheduler') }}" class="btn btn-sm btn-success">Start Scheduler</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status Tab -->
+        <div class="tab-pane fade" id="nav-status" role="tabpanel" aria-labelledby="nav-status-tab">
+            <h2 class="mb-4">System Status</h2>
+            
+            <div class="card">
+                <div class="card-header bg-info bg-opacity-25">
+                    <h4 class="mb-0"><i class="fas fa-server me-2"></i> System Status</h4>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            OpenAI API
+                            <span class="badge {% if openai_key %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if openai_key %}Configured{% else %}Not Configured{% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ElevenLabs API
+                            <span class="badge {% if elevenlabs_key %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if elevenlabs_key %}Configured{% else %}Not Configured{% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            GitHub Integration
+                            <span class="badge {% if github_token and github_username and github_repo %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if github_token and github_username and github_repo %}Configured{% else %}Not Configured{% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Voice Settings
+                            <span class="badge {% if default_voice %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if default_voice %}Configured{% else %}Not Configured{% endif %}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            RSS Feeds
+                            <span class="badge bg-primary">{{ active_feeds_count }} Active</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Scheduler
+                            <span class="badge {% if scheduler_running %}bg-success{% else %}bg-secondary{% endif %}">
+                                {% if scheduler_running %}Running{% else %}Stopped{% endif %}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start Guide Tab -->
+        <div class="tab-pane fade" id="nav-quickstart" role="tabpanel" aria-labelledby="nav-quickstart-tab">
+            <h2 class="mb-4">Quick Start Guide</h2>
+            
+            <div class="card">
+                <div class="card-header bg-info bg-opacity-25">
+                    <h4 class="mb-0"><i class="fas fa-rocket me-2"></i> Quick Start Guide</h4>
+                </div>
+                <div class="card-body p-0">
+                    <ol class="list-group list-group-flush list-group-numbered">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Manage Podcasts</div>
+                                Create and edit your podcast channels.
+                            </div>
+                            <a href="{{ url_for('settings', _anchor='nav-podcasts') }}" class="btn btn-sm btn-outline-primary">Go</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">API Keys</div>
+                                Set up OpenAI, ElevenLabs, and GitHub API keys.
+                            </div>
+                            <a href="{{ url_for('settings', _anchor='nav-api-keys') }}" class="btn btn-sm btn-outline-primary">Go</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Voice Settings</div>
+                                Configure ElevenLabs voice for text-to-speech.
+                            </div>
+                            <a href="{{ url_for('settings', _anchor='nav-voices') }}" class="btn btn-sm btn-outline-primary">Go</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Scheduler</div>
+                                Set up automatic podcast generation.
+                            </div>
+                            <a href="{{ url_for('settings', _anchor='nav-schedule') }}" class="btn btn-sm btn-outline-primary">Go</a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Generate Podcast</div>
+                                Create a new podcast episode from RSS feeds.
+                            </div>
+                            <a href="{{ url_for('generate_podcast') }}" class="btn btn-sm btn-outline-primary">Go</a>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Tab -->
+        <div class="tab-pane fade" id="nav-help" role="tabpanel" aria-labelledby="nav-help-tab">
+            <h2 class="mb-4">Help & Documentation</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary bg-opacity-25">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i> How to Create a New Podcast</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="mt-0 mb-3">Step-by-Step Instructions</h5>
+                            <ol class="list-group list-group-flush mb-4">
+                                <li class="list-group-item d-flex">
+                                    <span class="badge bg-primary rounded-circle me-3">1</span>
+                                    <div>
+                                        <strong>Configure API Keys</strong>
+                                        <p class="mb-0">Go to the <a href="{{ url_for('settings', _anchor='nav-api-keys') }}">API Keys</a> tab and enter your OpenAI and ElevenLabs API keys. These are required for generating podcast content.</p>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex">
+                                    <span class="badge bg-primary rounded-circle me-3">2</span>
+                                    <div>
+                                        <strong>Set Up Voice Settings</strong>
+                                        <p class="mb-0">Go to the <a href="{{ url_for('settings', _anchor='nav-voices') }}">Voices</a> tab and select a default voice. You can customize voice settings for each podcast later.</p>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex">
+                                    <span class="badge bg-primary rounded-circle me-3">3</span>
+                                    <div>
+                                        <strong>Create a New Podcast</strong>
+                                        <p class="mb-0">Go to the <a href="{{ url_for('settings', _anchor='nav-podcasts') }}">Podcasts</a> tab and click "Create New Podcast". Fill in the details like title, description, and category.</p>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex">
+                                    <span class="badge bg-primary rounded-circle me-3">4</span>
+                                    <div>
+                                        <strong>Add RSS Feeds</strong>
+                                        <p class="mb-0">While editing your podcast, add RSS feeds as news sources. These provide the content for your podcast episodes.</p>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex">
+                                    <span class="badge bg-primary rounded-circle me-3">5</span>
+                                    <div>
+                                        <strong>Create an Episode</strong>
+                                        <p class="mb-0">Click "Create New Episode" on the home page or "Generate Episode" button for a specific podcast to generate new content.</p>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex">
+                                    <span class="badge bg-primary rounded-circle me-3">6</span>
+                                    <div>
+                                        <strong>Publish and Share</strong>
+                                        <p class="mb-0">After generating an episode, you can publish it to GitHub Pages and share the RSS feed URL with your audience.</p>
+                                    </div>
+                                </li>
+                            </ol>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('new_podcast') }}" class="btn btn-primary"><i class="fas fa-plus-circle me-2"></i> Create New Podcast Now</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Required Services</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item bg-transparent">
+                                            <h6><i class="fas fa-brain me-2"></i> OpenAI API</h6>
+                                            <p class="small mb-0">Used for generating podcast scripts with ChatGPT.</p>
+                                            <a href="https://platform.openai.com/signup" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Get API Key</a>
+                                        </li>
+                                        <li class="list-group-item bg-transparent">
+                                            <h6><i class="fas fa-microphone me-2"></i> ElevenLabs</h6>
+                                            <p class="small mb-0">Provides realistic text-to-speech voices.</p>
+                                            <a href="https://elevenlabs.io/sign-up" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Get API Key</a>
+                                        </li>
+                                        <li class="list-group-item bg-transparent">
+                                            <h6><i class="fab fa-github me-2"></i> GitHub (Optional)</h6>
+                                            <p class="small mb-0">For publishing podcasts to GitHub Pages.</p>
+                                            <a href="https://github.com/settings/tokens" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Get Token</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-primary bg-opacity-25">
+                    <h4 class="mb-0"><i class="fas fa-question-circle me-2"></i> Frequently Asked Questions</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How much does it cost to generate podcasts?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    The cost depends on your usage of OpenAI and ElevenLabs APIs. A typical 10-minute podcast might cost around $0.10-$0.25 for the OpenAI content generation and $0.50-$2.00 for the ElevenLabs voice synthesis, depending on the models and settings used.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Can I customize the AI's tone and style?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes! You can provide custom instructions in the "AI Instructions" field when creating or editing a podcast. You can specify the tone, style, persona, and even add specific phrases or transitions you want the AI to use.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    How do I get my podcast on Apple Podcasts, Spotify, etc?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    After publishing your episodes, you'll get a podcast RSS feed URL. You can submit this URL to podcast directories like Apple Podcasts, Spotify, Google Podcasts, etc. Each platform has its own submission process, but they all require your RSS feed URL.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                this.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+    });
+    
+    // Update range slider values
+    document.getElementById('stability').addEventListener('input', function() {
+        document.getElementById('stability_value').textContent = this.value;
+    });
+    
+    document.getElementById('similarity_boost').addEventListener('input', function() {
+        document.getElementById('similarity_boost_value').textContent = this.value;
+    });
+    
+    // Activate the correct tab based on URL hash
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash;
+        if (hash) {
+            const tab = document.querySelector(`[data-bs-target="${hash}"]`);
+            if (tab) {
+                const bsTab = new bootstrap.Tab(tab);
+                bsTab.show();
+            }
+        }
+    });
+</script>
+{% endblock %}
